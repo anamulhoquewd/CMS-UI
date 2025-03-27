@@ -20,7 +20,7 @@ import {
 import Link from "next/link";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useState } from "react";
-import useLogin from "../../hooks/auth/useLogin";
+import useLogin from "@/hooks/auth/useLogin";
 
 function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);

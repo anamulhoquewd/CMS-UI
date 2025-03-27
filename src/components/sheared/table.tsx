@@ -1,4 +1,3 @@
-import PaginationForTable from "./paginationToTable";
 import { Input } from "@/components/ui/input";
 import { shortToLong } from "@/utils/date-converter";
 
@@ -24,32 +23,35 @@ import {
 import { flexRender } from "@tanstack/react-table";
 import { Badge } from "../ui/badge";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import { RoleBadge } from "../dashboard/role-badge";
 
-interface CustomTableProps {
+interface UsersTableProps {
   table: any;
   columns: any[];
-  users: any[];
+  setSearch: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function CustomTable({ table, columns, users }: CustomTableProps) {
+function UsersTable({ table, columns, setSearch }: UsersTableProps) {
   return (
     <>
       <div className="flex flex-row justify-between items-center py-4 gap-2">
         <Input
-          placeholder="Search by Name"
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
+          placeholder="Search..."
+          onChange={(event) => {
+            setTimeout(() => {
+              setSearch(event.target.value);
+            }, 2000);
+          }}
           className="max-w-sm"
         />
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="cursor-pointer">
-              Columns <ChevronDownIcon className="ml-2 h-4 w-4" />
+              Columns <ChevronDownIcon />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-white">
+          <DropdownMenuContent align="end">
             {table
               .getAllColumns()
               .filter(
@@ -70,7 +72,7 @@ function CustomTable({ table, columns, users }: CustomTableProps) {
                   return (
                     <DropdownMenuCheckboxItem
                       key={column.id}
-                      className="cursor-pointer capitalize transition-all duration-300 sm:hover:bg-white-2x"
+                      className="cursor-pointer capitalize"
                       checked={column.getIsVisible()}
                       onCheckedChange={(value) =>
                         column.toggleVisibility(!!value)
@@ -163,6 +165,19 @@ function CustomTable({ table, columns, users }: CustomTableProps) {
                                   Inactive
                                 </Badge>
                               )
+                            ) : cell.column.id === "role" &&
+                              cell.getValue() !== undefined ? (
+                              // akoi vabe role er jonno eta kaj korbe.
+                              cell.getValue() ? (
+                                <RoleBadge role={cell.getValue()} />
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className={"border-red-500 text-red-500"}
+                                >
+                                  Inactive
+                                </Badge>
+                              )
                             ) : cell.column.id === "defaultOffDays" &&
                               cell.getValue() !== undefined ? (
                               <DropdownMenu>
@@ -203,7 +218,7 @@ function CustomTable({ table, columns, users }: CustomTableProps) {
                           return (
                             <TableCell
                               key={cell.id}
-                              className="text-black-solid capitalize"
+                              className={`text-black-solid`}
                             >
                               {cellValue}
                             </TableCell>
@@ -227,10 +242,8 @@ function CustomTable({ table, columns, users }: CustomTableProps) {
         </Table>
         <ScrollBar orientation="horizontal" className="cursor-pointer" />
       </ScrollArea>
-
-      {users.length > 0 && <PaginationForTable table={table} />}
     </>
   );
 }
 
-export default CustomTable;
+export default UsersTable;

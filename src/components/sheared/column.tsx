@@ -22,16 +22,18 @@ import Link from "next/link";
 interface CustomerColumnsProps {
   setIsAddOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
-  setCustomerId: React.Dispatch<React.SetStateAction<string>>;
+  setId: React.Dispatch<React.SetStateAction<string>>;
   setIsDelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setValues: (values: any) => void;
-  iAmEditor?: boolean;
 }
 
 const userColumns = ({
-  setCustomerId,
+  setIsAddOpen,
+  setIsEditing,
   setIsDelOpen,
-}: ColumnsProps): ColumnDef<any>[] => {
+  setValues,
+  setId,
+}: CustomerColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "avatar",
@@ -52,7 +54,18 @@ const userColumns = ({
     },
     {
       accessorKey: "name",
-      header: "Name",
+      header: ({ column }) => {
+        return (
+          <Button
+            className="cursor-pointer"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Name
+            <ArrowUpDown />
+          </Button>
+        );
+      },
       cell: ({ row }) => <div>{row.getValue("name")}</div>,
     },
     {
@@ -86,9 +99,20 @@ const userColumns = ({
       cell: ({ row }) => <div>{row.getValue("role")}</div>,
     },
     {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => <div>{row.getValue("status")}</div>,
+      accessorKey: "active",
+      header: ({ column }) => {
+        return (
+          <Button
+            className="cursor-pointer"
+            variant="ghost"
+            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          >
+            Status
+            <ArrowUpDown />
+          </Button>
+        );
+      },
+      cell: ({ row }) => <div>{row.getValue("active")}</div>,
     },
     {
       accessorKey: "actions",
@@ -96,20 +120,38 @@ const userColumns = ({
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
+            <Button variant="ghost" className="h-8 w-8 p-0 cursor-pointer">
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
+
             <DropdownMenuItem
               onClick={() => {
-                setCustomerId(row.getValue("_id"));
+                setValues!(row.original);
+                setId(row.getValue("_id"));
+                setIsAddOpen!(true);
+                setIsEditing!(true);
+              }}
+              className="cursor-pointer"
+            >
+              <Pencil className="mr-2 h-4 w-4" />
+              Edit User
+            </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => {
+                setId(row.getValue("_id"));
                 setIsDelOpen(true);
               }}
+              className="cursor-pointer"
             >
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
+              <Trash2 />
+              Delete User
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -125,7 +167,7 @@ const customersColumns = ({
   setIsEditing,
   setIsDelOpen,
   setValues,
-  setCustomerId,
+  setId,
 }: CustomerColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
@@ -198,7 +240,7 @@ const customersColumns = ({
             variant="ghost"
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
           >
-            Active
+            Status
             <ArrowUpDown />
           </Button>
         );
@@ -228,7 +270,7 @@ const customersColumns = ({
             <DropdownMenuItem
               onClick={() => {
                 setValues!(row.original);
-                setCustomerId(row.getValue("_id"));
+                setId(row.getValue("_id"));
                 setIsAddOpen!(true);
                 setIsEditing!(true);
               }}
@@ -242,7 +284,7 @@ const customersColumns = ({
             <DropdownMenuItem
               variant="destructive"
               onClick={() => {
-                setCustomerId(row.getValue("_id"));
+                setId(row.getValue("_id"));
                 setIsDelOpen(true);
               }}
               className="cursor-pointer"
@@ -263,10 +305,10 @@ const orderColumns = ({
   setIsAddOpen,
   setIsEditing,
   setValues,
-  setCustomerId,
+  setId,
   setIsDelOpen,
   iAmEditor = true,
-}: ColumnsProps): ColumnDef<any>[] => {
+}: OrderColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "_id",
@@ -323,7 +365,7 @@ const orderColumns = ({
             <DropdownMenuItem
               onClick={() => {
                 setValues!(row.original);
-                setCustomerId(row.getValue("_id"));
+                setId(row.getValue("_id"));
                 setIsAddOpen!(true);
                 setIsEditing!(true);
               }}
@@ -336,7 +378,7 @@ const orderColumns = ({
 
             <DropdownMenuItem
               onClick={() => {
-                setCustomerId(row.getValue("_id"));
+                setId(row.getValue("_id"));
                 setIsDelOpen(true);
               }}
             >
@@ -355,7 +397,7 @@ const paymentColumns = ({
   setIsAddOpen,
   setIsEditing,
   setValues,
-  setCustomerId,
+  setId,
   setIsDelOpen,
   iAmEditor = true,
 }: ColumnsProps): ColumnDef<any>[] => {
@@ -415,7 +457,7 @@ const paymentColumns = ({
             <DropdownMenuItem
               onClick={() => {
                 setValues!(row.original);
-                setCustomerId(row.getValue("_id"));
+                setId(row.getValue("_id"));
                 setIsAddOpen!(true);
                 setIsEditing!(true);
               }}
@@ -428,7 +470,7 @@ const paymentColumns = ({
 
             <DropdownMenuItem
               onClick={() => {
-                setCustomerId(row.getValue("_id"));
+                setId(row.getValue("_id"));
                 setIsDelOpen(true);
               }}
             >

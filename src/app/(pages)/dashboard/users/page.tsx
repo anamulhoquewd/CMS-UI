@@ -17,9 +17,8 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import useCustomer from "@/hooks/customer";
 import { useState } from "react";
-import { customersColumns } from "@/components/sheared/column";
+import { userColumns } from "@/components/sheared/column";
 import UsersTable from "@/components/sheared/table";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
@@ -31,8 +30,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import RegistrationForm from "@/components/customer/registerForm";
+import RegistrationForm from "@/components/user/registerForm";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import useUser from "@/hooks/user";
 import DeleteAlert from "@/components/sheared/delete-alert";
 import PaginationForTable from "@/components/sheared/paginationToTable";
 
@@ -41,56 +41,53 @@ import PaginationForTable from "@/components/sheared/paginationToTable";
 //   description: "Manage and analyze customers",
 // };
 
-export default function CustomersPage() {
+export default function UsersPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     _id: false,
     name: true,
+    email: true,
     phone: true,
-    address: true,
-    defaultItem: true,
-    defaultPrice: true,
-    defaultQuantity: true,
-    defaultOffDays: false,
-    paymentStatus: false,
-    paymentSystem: false,
+    address: false,
+    role: true,
+    NID: false,
     active: true,
     actions: true,
   });
 
   const {
-    customers,
+    users,
     setIsAddOpen,
-    setIsDelOpen,
     setIsEditing,
+    setUserId,
     isEditing,
     setDefaultValues: setValues,
     defaultValues: values,
-    setCustomerId,
     isLoading,
-    createCustomer: onSubmit,
-    updateCustomer: onUpdate,
     form,
     isAddOpen,
+    updateUsers: onUpdate,
+    createUsers: onSubmit,
     isDelOpen,
+    setIsDelOpen,
     deleteCustomer: onDelete,
     pagination,
     setPagination,
     setSearch,
-  } = useCustomer();
+  } = useUser();
 
-  const columns = customersColumns({
+  const columns = userColumns({
     setIsAddOpen,
     setIsEditing,
     setIsDelOpen,
     setValues,
-    setId: setCustomerId,
+    setId: setUserId,
   });
 
   const table = useReactTable({
     columns,
-    data: customers,
+    data: users,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -118,15 +115,15 @@ export default function CustomersPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatsCard
           title="Total Customers"
-          value={customers.length.toString() || "0"}
+          value={pagination.total.toString() || "0"}
           description="+10.1% from last month"
           icon="users"
         />
         <StatsCard
           title="Active Customers"
           value={
-            customers
-              .filter((customer: { active: boolean }) => customer.active)
+            users
+              .filter((user: { active: boolean }) => user.active)
               .length.toString() || "0"
           }
           description="+5.2% from last month"
@@ -143,8 +140,10 @@ export default function CustomersPage() {
       <Card className="w-full overflow-hidden">
         <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-3 space-y-0">
           <div className="space-y-2">
-            <CardTitle>All Customers</CardTitle>
-            <CardDescription>Manage and view all customers</CardDescription>
+            <CardTitle>All Users</CardTitle>
+            <CardDescription>
+              Manage and view all users (Admins and Managers)
+            </CardDescription>
           </div>
           <Dialog
             open={isAddOpen}
@@ -152,18 +151,15 @@ export default function CustomersPage() {
               if (!open) {
                 form.reset({
                   name: "",
+                  email: "",
                   phone: "",
                   address: "",
-                  defaultPrice: 0,
-                  defaultQuantity: 1,
-                  defaultOffDays: [],
-                  paymentStatus: "pending",
-                  defaultItem: "lunch",
-                  paymentSystem: "weekly",
+                  NID: "",
+                  role: "manager",
                   active: true,
                 });
                 setValues(null);
-                setCustomerId("");
+                setUserId("");
                 setIsEditing(false);
               }
               setIsAddOpen(open);
@@ -180,9 +176,9 @@ export default function CustomersPage() {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Customer Registration Form</DialogTitle>
+                <DialogTitle>Users Registration Form</DialogTitle>
                 <DialogDescription>
-                  Fill out the form below to complete new customer registration.
+                  Fill out the form below to complete new user registration.
                 </DialogDescription>
               </DialogHeader>
               <ScrollArea className="sm:max-w-[525px] h-[65dvh] overflow-hidden pr-2 md:px-4">
@@ -212,7 +208,7 @@ export default function CustomersPage() {
         isOpen={isDelOpen}
         setIsOpen={setIsDelOpen}
         cb={onDelete}
-        setId={setCustomerId}
+        setId={setUserId}
       />
     </div>
   );

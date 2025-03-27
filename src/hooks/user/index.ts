@@ -1,22 +1,21 @@
 import { Pagination } from "@/interface";
-import { customerRegistrationFormSchema } from "@/lib/validations/auth";
+import { userRegistrationFormSchema } from "@/lib/validations/auth";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
-import { logToShort } from "@/utils/date-converter";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const useCustomer = () => {
+const useUser = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [customers, setCustomers] = useState([]);
+  const [users, setUsers] = useState([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDelOpen, setIsDelOpen] = useState(false);
   const [defaultValues, setDefaultValues] = useState(null);
-  const [customerId, setCustomerId] = useState("");
+  const [userId, setUserId] = useState("");
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
     total: 0,
@@ -24,12 +23,13 @@ const useCustomer = () => {
     nextPage: null,
     prevPage: null,
   });
-  const [search, setSearch] = useState(""); // Name or Phone
+  const [search, setSearch] = useState(""); // Name or Phone or Email or NID
   const [debouchedSearch, setDebouncedSearch] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
+      setPagination((prev) => ({ ...prev, page: 1 }));
     }, 500);
 
     return () => {
@@ -37,26 +37,23 @@ const useCustomer = () => {
     };
   }, [search]);
 
-  const getCustomers = useCallback(async (page = 1, search = "") => {
+  const getUsers = useCallback(async (page = 1, search = "") => {
     setIsLoading(true);
 
     try {
-      const response = await api.get(
-        `/customers?page=${page}&search=${search}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        }
-      );
+      const response = await api.get(`/users?page=${page}&search=${search}`, {
+        headers: {
+          Authorization: `Bearer ${getStorage("accessToken")}`,
+        },
+      });
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
       }
 
-      console.log("Customers fetched successfully");
+      console.log("Users fetched successfully");
 
-      setCustomers(response.data.data || []);
+      setUsers(response.data.data || []);
 
       setPagination(() => ({
         page: response.data.pagination.page,
@@ -72,33 +69,27 @@ const useCustomer = () => {
     }
   }, []);
 
-  const form = useForm<z.infer<typeof customerRegistrationFormSchema>>({
-    resolver: zodResolver(customerRegistrationFormSchema),
+  const form = useForm<z.infer<typeof userRegistrationFormSchema>>({
+    resolver: zodResolver(userRegistrationFormSchema),
     defaultValues: {
       name: "",
+      email: "",
+      NID: "",
+      role: "manager",
       phone: "",
       address: "",
-      defaultPrice: 0,
-      defaultQuantity: 1,
-      defaultOffDays: [],
-      paymentStatus: "pending",
-      defaultItem: "lunch",
-      paymentSystem: "weekly",
       active: true,
     },
   });
 
-  const createCustomer = async () => {
+  const createUsers = async () => {
     // Loading spinner start
     setIsLoading(true);
 
     try {
       const response = await api.post(
-        "/customers/auth/register",
-        {
-          ...form.getValues(),
-          defaultOffDays: logToShort(form.getValues().defaultOffDays || []),
-        },
+        "/users/auth/register",
+        form.getValues(),
         {
           headers: {
             Authorization: `Bearer ${getStorage("accessToken")}`,
@@ -110,7 +101,7 @@ const useCustomer = () => {
         throw new Error(response.data.error.message);
       }
 
-      console.log("Customer created successfully");
+      console.log("Users created successfully");
 
       // Reset form
       form.reset();
@@ -121,8 +112,8 @@ const useCustomer = () => {
       // Remove values
       setDefaultValues(null);
 
-      // Update customer table
-      getCustomers();
+      // Update users table
+      getUsers();
     } catch (error: any) {
       handleAxiosError(error);
 
@@ -145,38 +136,37 @@ const useCustomer = () => {
     }
   };
 
-  const updateCustomer = async () => {
+  const updateUsers = async () => {
     // Loading spinner start
     setIsLoading(true);
 
     try {
-      const response = await api.put(
-        `/customers/${customerId}`,
-        {
-          ...form.getValues(),
-          defaultOffDays: logToShort(form.getValues().defaultOffDays || []),
+      const response = await api.put(`/users/${userId}`, form.getValues(), {
+        headers: {
+          Authorization: `Bearer ${getStorage("accessToken")}`,
         },
-        {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        }
-      );
+      });
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
       }
 
-      console.log("Customer updated successfully");
+      console.log("Users updated successfully");
 
       // Reset form
       form.reset();
 
-      // Close modal
+      // Update editing status
       setIsEditing(false);
 
+      // Close modal
+      setIsAddOpen(false);
+
+      // Close delete modal
+      setIsDelOpen(false);
+
       // Update customer table
-      getCustomers();
+      getUsers();
     } catch (error: any) {
       handleAxiosError(error);
 
@@ -204,7 +194,7 @@ const useCustomer = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.delete(`/customers/${customerId}`, {
+      const response = await api.delete(`/users/${userId}`, {
         headers: {
           Authorization: `Bearer ${getStorage("accessToken")}`,
         },
@@ -220,7 +210,7 @@ const useCustomer = () => {
       setIsDelOpen(false);
 
       // Update customer table
-      getCustomers();
+      getUsers();
     } catch (error: any) {
       const res = handleAxiosError(error);
 
@@ -234,12 +224,12 @@ const useCustomer = () => {
   const getSingleCustomer = async () => {};
 
   useEffect(() => {
-    getCustomers(pagination.page, debouchedSearch);
+    getUsers(pagination.page, debouchedSearch);
   }, [pagination.page, debouchedSearch]);
 
   return {
     isLoading,
-    customers,
+    users,
 
     form,
 
@@ -248,15 +238,17 @@ const useCustomer = () => {
     setIsEditing,
     isEditing,
     setIsDelOpen,
-    setCustomerId,
+    isDelOpen,
     setDefaultValues,
     defaultValues,
 
+    setUserId,
+
     getSingleCustomer,
-    createCustomer,
-    updateCustomer,
+
     deleteCustomer,
-    isDelOpen,
+    updateUsers,
+    createUsers,
     pagination,
     setPagination,
     search,
@@ -264,4 +256,4 @@ const useCustomer = () => {
   };
 };
 
-export default useCustomer;
+export default useUser;

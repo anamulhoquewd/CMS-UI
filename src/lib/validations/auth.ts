@@ -56,6 +56,23 @@ const updateUserBySelfSchema = z.object({
   role: z.string().optional(),
 });
 
+const userRegistrationFormSchema = z.object({
+  name: z.string().min(3).max(50),
+  email: z.string().email(),
+  phone: z
+    .string()
+    .regex(
+      /^01\d{9}$/,
+      "Phone number must start with 01 and be exactly 11 digits"
+    ),
+  address: z.string().max(100),
+  NID: z.string().refine((val) => /^\d{10}$|^\d{17}$/.test(val), {
+    message: "NID must be either 10 or 17 digits",
+  }),
+  role: z.enum(["admin", "manager"]),
+  active: z.boolean().default(true),
+});
+
 const customerRegistrationFormSchema = z.object({
   name: z.string().min(3, { message: "Name must be at least 3 characters" }),
   phone: z.string().min(11, { message: "Please enter a valid phone number" }),
@@ -89,4 +106,5 @@ export {
   updateUserBySelfSchema,
   changePasswordFormSchema,
   customerRegistrationFormSchema,
+  userRegistrationFormSchema,
 };

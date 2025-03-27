@@ -73,7 +73,7 @@ const useLogin = () => {
       form.reset();
 
       // Redirect to home page
-      window.location.href = "/me";
+      window.location.href = "/";
     } catch (error: any) {
       // Handle error
       handleAxiosError(error);
