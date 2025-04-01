@@ -1,16 +1,13 @@
-import { updateUserBySelfSchema } from "@/lib/validations/auth";
+import { UserSchema } from "@/interface";
+import { updateUserBySelfSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
-import { useAuth, UserSchema } from "@/store/auth/useAuth";
 import { getStorage } from "@/store/local";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-const useProfile = () => {
-  const user = useAuth((state) => state.user) as UserSchema;
-  const updateUserData = useAuth((state) => state.update);
-
+const useUpdate = ({ user }: { user: UserSchema | null }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -39,12 +36,7 @@ const useProfile = () => {
     }
   }, [user, form]);
 
-  const onSubmit = async (
-    data: z.infer<typeof updateUserBySelfSchema>,
-    {
-      setIsLoading,
-    }: { setIsLoading: React.Dispatch<React.SetStateAction<boolean>> }
-  ) => {
+  const onSubmit = async (data: z.infer<typeof updateUserBySelfSchema>) => {
     setIsLoading(true);
     try {
       const response = await api.patch("/users/profile", data, {
@@ -54,13 +46,7 @@ const useProfile = () => {
       });
 
       if (response.data.success) {
-        updateUserData({
-          ...user,
-          name: response.data.data.name as string,
-          email: response.data.data.email as string,
-          phone: response.data.data.phone as string,
-          address: response.data.data.address as string,
-        });
+        console.log("Profile updated successfully");
       }
 
       setIsEditing(false);
@@ -90,4 +76,4 @@ const useProfile = () => {
   };
 };
 
-export default useProfile;
+export default useUpdate;

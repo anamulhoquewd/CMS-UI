@@ -5,17 +5,14 @@ import { Dialog, DialogContent, DialogHeader } from "@/components/ui/dialog";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { Camera } from "lucide-react";
 import { useRef } from "react";
-import useMe from "../hook/useAvatar";
+import useAvatar from "../../hooks/auth/useAvatar";
+import useGetMe from "@/hooks/auth/useGetMe";
 
 export function UploadAvatar() {
-  const {
-    uploadHandler,
-    error,
-    setError,
-    user,
-    isAvatarOpen,
-    setIsAvatarOpen,
-  } = useMe();
+  const { uploadHandler, error, setError, isAvatarOpen, setIsAvatarOpen } =
+    useAvatar();
+
+  const { user } = useGetMe();
 
   // input ref
   const fileInputRef = useRef<HTMLInputElement>(null);

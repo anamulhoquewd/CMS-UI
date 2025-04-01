@@ -1,5 +1,5 @@
 import { Pagination } from "@/interface";
-import { userRegistrationFormSchema } from "@/lib/validations/auth";
+import { userRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
 import { handleAxiosError } from "@/utils/error";
@@ -41,7 +41,11 @@ const useUser = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.get(`/users?page=${page}&search=${search}`, {
+      const response = await api.get("/users", {
+        params: {
+          search,
+          page,
+        },
         headers: {
           Authorization: `Bearer ${getStorage("accessToken")}`,
         },
@@ -116,6 +120,7 @@ const useUser = () => {
       getUsers();
     } catch (error: any) {
       handleAxiosError(error);
+      console.log("error in create user", error);
 
       // Set form errors
       if (error.response && error.response.data) {

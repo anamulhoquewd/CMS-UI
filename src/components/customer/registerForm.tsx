@@ -45,10 +45,12 @@ export default function RegistrationForm({
   onSubmit,
   isLoading,
   values,
+  isEditing,
 }: {
   values: any;
+  isEditing: boolean;
   form: any;
-  onSubmit: any;
+  onSubmit: (data: any) => void;
   isLoading: boolean;
 }) {
   const [daysPopoverOpen, setDaysPopoverOpen] = useState(false);
@@ -147,7 +149,15 @@ export default function RegistrationForm({
             <FormItem>
               <FormLabel className="cursor-pointer">Default Price</FormLabel>
               <FormControl>
-                <Input placeholder="100" type="number" min="0" {...field} />
+                <Input
+                  placeholder="100"
+                  type="number"
+                  min="0"
+                  {...field}
+                  onChange={(e) =>
+                    field.onChange(e.target.value ? Number(e.target.value) : 0)
+                  }
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -161,7 +171,15 @@ export default function RegistrationForm({
             <FormItem>
               <FormLabel className="cursor-pointer">Default Quantity</FormLabel>
               <FormControl>
-                <Input placeholder="10" type="number" min="1" {...field} />
+                <Input
+                  placeholder="10"
+                  type="number"
+                  min="1"
+                  {...field}
+                  onChange={(e) =>
+                    field.onChange(e.target.value ? Number(e.target.value) : 1)
+                  }
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -191,14 +209,15 @@ export default function RegistrationForm({
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-full p-0" align="start">
-                  <div className="p-4">
+                  <div className="bg-popover text-popover-foreground relative z-50 max-h-(--radix-select-content-available-height) min-w-[10rem] origin-(--radix-select-content-transform-origin) overflow-x-hidden overflow-y-auto rounded-md border shadow-md p-2">
                     {days.map((day) => (
                       <div
                         key={day.id}
-                        className="flex items-center space-x-4 p-2 rounded hover:bg-zinc-50"
+                        className="hover:bg-accent hover:text-accent-foreground relative flex w-full cursor-default items-center gap-2 rounded-sm p-2 text-sm"
                       >
                         <Checkbox
                           id={`day-${day.id}`}
+                          className="cursor-pointer"
                           checked={field.value?.includes(day.id)}
                           onCheckedChange={(checked) => {
                             const updatedDays = checked
@@ -304,22 +323,16 @@ export default function RegistrationForm({
         />
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            type="button"
-            className="cursor-pointer"
-            onClick={() => form.reset()}
-          >
-            Reset
-          </Button>
           <Button type="submit" className="cursor-pointer" disabled={isLoading}>
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Submitting...
               </>
+            ) : isEditing ? (
+              "Update"
             ) : (
-              "Register"
+              "Submit"
             )}
           </Button>
         </DialogFooter>

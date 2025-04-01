@@ -1,17 +1,6 @@
+import { UserSchema } from "@/interface";
 import { create, StateCreator } from "zustand";
 import { devtools, persist } from "zustand/middleware";
-
-export interface UserSchema {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  NID: string;
-  role: "admin" | "manager" | "super_admin";
-  active: boolean;
-  avatar: string;
-}
 
 interface AuthState {
   user: UserSchema | null;
@@ -36,4 +25,4 @@ const useAuth = create(
   )
 );
 
-export { useAuth };
+// export { useAuth };

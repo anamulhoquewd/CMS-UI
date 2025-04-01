@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect,  } from "react";
-import {  Loader2 } from "lucide-react";
+import { useEffect } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -113,7 +113,7 @@ export default function RegistrationForm({
             </FormItem>
           )}
         />
-         <FormField
+        <FormField
           control={form.control}
           name="role"
           render={({ field }) => (
@@ -138,7 +138,7 @@ export default function RegistrationForm({
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="active"
@@ -161,17 +161,8 @@ export default function RegistrationForm({
             </FormItem>
           )}
         />
-       
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            type="button"
-            className="cursor-pointer"
-            onClick={() => form.reset()}
-          >
-            Reset
-          </Button>
           <Button type="submit" className="cursor-pointer" disabled={isLoading}>
             {isLoading ? (
               <>

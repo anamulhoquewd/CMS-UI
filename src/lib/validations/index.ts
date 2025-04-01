@@ -89,7 +89,7 @@ const customerRegistrationFormSchema = z.object({
     .number()
     .int()
     .positive({ message: "Quantity must be a positive integer" }),
-  defaultOffDays: z.array(z.string()).optional(),
+  defaultOffDays: z.array(z.string()).default([]),
   paymentStatus: z.enum(["paid", "partially_paid", "pending"], {
     required_error: "Please select a payment status",
   }),
@@ -97,6 +97,17 @@ const customerRegistrationFormSchema = z.object({
     required_error: "Please select a payment system",
   }),
   active: z.boolean().default(true),
+});
+
+const orderRegistrationFormSchema = z.object({
+  customerId: z
+    .string()
+    .length(24, "Please Select a customer"),
+  price: z.number().min(0),
+  quantity: z.number().min(1),
+  item: z.enum(["lunch", "dinner", "lunch&dinner", ""]),
+  date: z.date(),
+  note: z.string().optional(),
 });
 
 export {
@@ -107,4 +118,5 @@ export {
   changePasswordFormSchema,
   customerRegistrationFormSchema,
   userRegistrationFormSchema,
+  orderRegistrationFormSchema,
 };

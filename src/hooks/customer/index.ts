@@ -1,5 +1,5 @@
 import { Pagination } from "@/interface";
-import { customerRegistrationFormSchema } from "@/lib/validations/auth";
+import { customerRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
 import { logToShort } from "@/utils/date-converter";
@@ -173,6 +173,9 @@ const useCustomer = () => {
       form.reset();
 
       // Close modal
+      setIsAddOpen(false);
+
+      // Remove values
       setIsEditing(false);
 
       // Update customer table

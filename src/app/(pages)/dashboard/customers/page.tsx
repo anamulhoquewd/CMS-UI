@@ -190,6 +190,7 @@ export default function CustomersPage() {
                   form={form}
                   values={values}
                   onSubmit={isEditing ? onUpdate : onSubmit}
+                  isEditing={isEditing}
                   isLoading={isLoading}
                 />
                 <ScrollBar orientation="vertical" className="w-2.5" />

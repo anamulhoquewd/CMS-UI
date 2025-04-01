@@ -24,6 +24,7 @@ import { flexRender } from "@tanstack/react-table";
 import { Badge } from "../ui/badge";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { RoleBadge } from "../dashboard/role-badge";
+import { format } from "date-fns";
 
 interface UsersTableProps {
   table: any;
@@ -143,7 +144,9 @@ function UsersTable({ table, columns, setSearch }: UsersTableProps) {
                       >
                         {row.getVisibleCells().map((cell) => {
                           const cellValue =
-                            cell.column.id === "defaultPrice" &&
+                            (cell.column.id === "defaultPrice" ||
+                              cell.column.id === "price" ||
+                              cell.column.id === "total") &&
                             cell.getValue() !== undefined ? (
                               // jodi price hoy tahole just .00 add korar jonno eti kora hoyeche.
                               Number.parseFloat(cell.getValue()).toFixed(2)
@@ -178,6 +181,9 @@ function UsersTable({ table, columns, setSearch }: UsersTableProps) {
                                   Inactive
                                 </Badge>
                               )
+                            ) : cell.column.id === "date" &&
+                              cell.getValue() !== undefined ? (
+                              format(cell.getValue(), "yyyy-MM-dd")
                             ) : cell.column.id === "defaultOffDays" &&
                               cell.getValue() !== undefined ? (
                               <DropdownMenu>
@@ -194,18 +200,25 @@ function UsersTable({ table, columns, setSearch }: UsersTableProps) {
                                     Default Off Days
                                   </DropdownMenuLabel>
                                   <DropdownMenuSeparator />
-                                  {shortToLong(
-                                    cell.row.original.defaultOffDays
-                                  ).map((element: string) => {
-                                    return (
-                                      <DropdownMenuItem
-                                        className="capitalize"
-                                        key={element}
-                                      >
-                                        {element}
-                                      </DropdownMenuItem>
-                                    );
-                                  })}
+                                  {shortToLong(cell.row.original.defaultOffDays)
+                                    .length > 0 ? (
+                                    shortToLong(
+                                      cell.row.original.defaultOffDays
+                                    ).map((element: string) => {
+                                      return (
+                                        <DropdownMenuItem
+                                          className="capitalize"
+                                          key={element}
+                                        >
+                                          {element}
+                                        </DropdownMenuItem>
+                                      );
+                                    })
+                                  ) : (
+                                    <DropdownMenuItem className="flex justify-center text-muted-foreground">
+                                      None
+                                    </DropdownMenuItem>
+                                  )}
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             ) : (

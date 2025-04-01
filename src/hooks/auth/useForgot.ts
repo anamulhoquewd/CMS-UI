@@ -2,7 +2,7 @@ import { z } from "zod";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { forgotPasswordFormSchema } from "@/lib/validations/auth";
+import { forgotPasswordFormSchema } from "@/lib/validations/";
 
 const useForgot = () => {
   const form = useForm<z.infer<typeof forgotPasswordFormSchema>>({

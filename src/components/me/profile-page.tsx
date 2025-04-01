@@ -14,21 +14,17 @@ import { UploadAvatar } from "./upload-avatar";
 import ChangePassword from "./change-password";
 import { Form } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
-import useProfile from "../hook/useProfile";
+import useUpdate from "../../hooks/auth/useUpdate";
 import { useState } from "react";
 import { ProfileDataInputField } from "./passwordInputField";
+import useGetMe from "@/hooks/auth/useGetMe";
 
 export function UserProfile() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
-  const {
-    form,
+  const { user } = useGetMe();
+  const { form, onSubmit, isEditing, setIsEditing, isLoading } = useUpdate({
     user,
-    onSubmit,
-    isEditing,
-    setIsEditing,
-    setIsLoading,
-    isLoading,
-  } = useProfile();
+  });
 
   return (
     <div className="grid gap-6 md:grid-cols-[300px_1fr] lg:gap-10">
@@ -69,9 +65,7 @@ export function UserProfile() {
         <CardContent>
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit((data) =>
-                onSubmit(data, { setIsLoading })
-              )}
+              onSubmit={form.handleSubmit((data) => onSubmit(data))}
               className="space-y-6"
             >
               <div className="grid gap-4 md:grid-cols-2">

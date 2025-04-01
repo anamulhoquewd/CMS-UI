@@ -19,7 +19,7 @@ import {
 import Link from "next/link";
 
 // Define Props Interface
-interface CustomerColumnsProps {
+interface ColumnsProps {
   setIsAddOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
   setId: React.Dispatch<React.SetStateAction<string>>;
@@ -33,7 +33,7 @@ const userColumns = ({
   setIsDelOpen,
   setValues,
   setId,
-}: CustomerColumnsProps): ColumnDef<any>[] => {
+}: ColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "avatar",
@@ -168,7 +168,7 @@ const customersColumns = ({
   setIsDelOpen,
   setValues,
   setId,
-}: CustomerColumnsProps): ColumnDef<any>[] => {
+}: ColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "_id",
@@ -304,52 +304,62 @@ const customersColumns = ({
 const orderColumns = ({
   setIsAddOpen,
   setIsEditing,
+  setIsDelOpen,
   setValues,
   setId,
-  setIsDelOpen,
-  iAmEditor = true,
-}: OrderColumnsProps): ColumnDef<any>[] => {
+}: ColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "_id",
       header: "ID",
+      cell: ({ row }) => <div>{row.getValue("_id")}</div>,
     },
     {
-      accessorKey: "customer",
+      accessorKey: "customerId",
       header: "Customer ID",
+      cell: ({ row }) => <div>{row.getValue("customerId")}</div>,
     },
     {
-      accessorKey: "name",
+      accessorKey: "customerName",
       header: "Name",
+      cell: ({ row }) => <div>{row.getValue("customerName")}</div>,
     },
     {
-      accessorKey: "phone",
+      accessorKey: "customerPhone",
       header: "Phone",
-    },
-    {
-      accessorKey: "secondaryPhone",
-      header: "Secondary Phone",
-    },
-    {
-      accessorKey: "address",
-      header: "Address",
-    },
-    {
-      accessorKey: "quantity",
-      header: "Quantity",
-    },
-    {
-      accessorKey: "price",
-      header: "Price",
+      cell: ({ row }) => <div>{row.getValue("customerPhone")}</div>,
     },
     {
       accessorKey: "date",
       header: "Date",
+      cell: ({ row }) => <div>{row.getValue("date")}</div>,
     },
-  ];
-
-  if (iAmEditor) {
-    columns.push({
+    {
+      accessorKey: "note",
+      header: "Note",
+      cell: ({ row }) => <div>{row.getValue("note")}</div>,
+    },
+    {
+      accessorKey: "item",
+      header: "Item",
+      cell: ({ row }) => <div>{row.getValue("item")}</div>,
+    },
+    {
+      accessorKey: "price",
+      header: "Price",
+      cell: ({ row }) => <div>{row.getValue("price")}</div>,
+    },
+    {
+      accessorKey: "quantity",
+      header: "Quantity",
+      cell: ({ row }) => <div>{row.getValue("quantity")}</div>,
+    },
+    {
+      accessorKey: "total",
+      header: "Total",
+      cell: ({ row }) => <div>{row.getValue("total")}</div>,
+    },
+    {
       accessorKey: "actions",
       header: "Actions",
       cell: ({ row }) => (
@@ -377,18 +387,21 @@ const orderColumns = ({
             <DropdownMenuSeparator />
 
             <DropdownMenuItem
+              variant="destructive"
               onClick={() => {
                 setId(row.getValue("_id"));
                 setIsDelOpen(true);
               }}
+              className="cursor-pointer"
             >
-              <Trash2 className="mr-2 h-4 w-4" /> Delete
+              <Trash2 />
+              Delete Customer
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
-    });
-  }
+    },
+  ];
 
   return columns;
 };
@@ -399,7 +412,6 @@ const paymentColumns = ({
   setValues,
   setId,
   setIsDelOpen,
-  iAmEditor = true,
 }: ColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
@@ -438,10 +450,7 @@ const paymentColumns = ({
       accessorKey: "date",
       header: "Date",
     },
-  ];
-
-  if (iAmEditor) {
-    columns.push({
+    {
       accessorKey: "actions",
       header: "Actions",
       cell: ({ row }) => (
@@ -479,8 +488,8 @@ const paymentColumns = ({
           </DropdownMenuContent>
         </DropdownMenu>
       ),
-    });
-  }
+    },
+  ];
 
   return columns;
 };

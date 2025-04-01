@@ -1,0 +1,32 @@
+import { UserSchema } from "@/interface";
+import api from "@/protectedApi/Interceptor";
+import { getStorage } from "@/store/local";
+import { useEffect, useState } from "react";
+
+function useGetMe() {
+  const [user, setUser] = useState<UserSchema | null>(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await api.get("/auth/me", {
+          headers: {
+            Authorization: `Bearer ${getStorage("accessToken")}`,
+          },
+        });
+
+        if (response.data.success) {
+          setUser(response.data.data);
+        }
+      } catch (error: any) {
+        console.warn(error);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  return { user };
+}
+
+export default useGetMe;

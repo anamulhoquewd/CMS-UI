@@ -1,4 +1,4 @@
-import { changePasswordFormSchema } from "@/lib/validations/auth";
+import { changePasswordFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
 import { zodResolver } from "@hookform/resolvers/zod";

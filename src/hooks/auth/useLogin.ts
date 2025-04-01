@@ -1,17 +1,16 @@
-import { loginFormSchema } from "@/lib/validations/auth";
+import { loginFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
-import { useAuth, UserSchema } from "@/store/auth/useAuth";
 import { setStorage } from "@/store/local";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { jwtDecode } from "jwt-decode";
+// import { jwtDecode } from "jwt-decode";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const useLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  // const { login } = useAuth();
 
   const form = useForm<z.infer<typeof loginFormSchema>>({
     resolver: zodResolver(loginFormSchema),
@@ -50,24 +49,24 @@ const useLogin = () => {
       setStorage("accessToken", accessToken);
 
       // Decode access token
-      const { id }: { id: string } = jwtDecode(accessToken);
+      // const { id }: { id: string } = jwtDecode(accessToken);
 
       // Get user data from API
-      const res = await api.get(`/users/${id}`);
-      const user: UserSchema = res.data.data;
+      // const res = await api.get(`/users/${id}`);
+      // const user: UserSchema = res.data.data;
 
       // Set user in Zustand store
-      login({
-        NID: user.NID,
-        address: user.address,
-        active: user.active,
-        email: user.email,
-        name: user.name,
-        phone: user.phone,
-        role: user.role,
-        id: user.id,
-        avatar: user.avatar || "",
-      });
+      // login({
+      //   NID: user.NID,
+      //   address: user.address,
+      //   active: user.active,
+      //   email: user.email,
+      //   name: user.name,
+      //   phone: user.phone,
+      //   role: user.role,
+      //   id: user.id,
+      //   avatar: user.avatar || "",
+      // });
 
       // Clear form
       form.reset();

@@ -20,13 +20,13 @@ import { ModeToggle } from "@/components/theme-switcher";
 
 import logoDark from "@/../public/logo-dark.png";
 import logoLight from "@/../public/logo-light.png";
-import { useAuth } from "@/store/auth/useAuth";
 import { RoleBadge } from "@/components/dashboard/role-badge";
 import { useSidebar } from "@/components/ui/sidebar";
+import useGetMe from "@/hooks/auth/useGetMe";
 
 export default function Header() {
-  const user = useAuth((state) => state.user);
   const { resolvedTheme } = useTheme();
+  const { user } = useGetMe();
 
   const { isMobile, setOpenMobile } = useSidebar();
 

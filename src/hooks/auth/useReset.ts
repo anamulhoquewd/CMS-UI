@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import axios from "axios";
 import { redirect } from "next/navigation";
-import { resetPasswordFormSchema } from "@/lib/validations/auth";
+import { resetPasswordFormSchema } from "@/lib/validations/";
 import { handleAxiosError } from "@/utils/error";
 
 const useReset = () => {

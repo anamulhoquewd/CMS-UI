@@ -1,4 +1,4 @@
-import { useAuth } from "@/store/auth/useAuth";
+// import { useAuth } from "@/store/auth/useAuth";
 import { removeStorage, setStorage } from "@/store/local";
 import axios from "axios";
 
@@ -51,8 +51,10 @@ api.interceptors.response.use(
           );
           removeStorage("accessToken");
 
-          const logout = useAuth.getState().logout;
-          logout();
+          // const logout = useAuth.getState().logout;
+          // logout();
+
+          // await api.post("/users/auth/logout");
 
           window.location.href = "/auth/sign-in"; // Redirect to login
           return Promise.reject(error);
@@ -70,8 +72,6 @@ api.interceptors.response.use(
         console.error("Refresh token expired or invalid:", refreshError);
 
         removeStorage("accessToken");
-        const logout = useAuth.getState().logout;
-        logout();
 
         window.location.href = "/auth/sign-in"; // Redirect to login
         return Promise.reject(refreshError);

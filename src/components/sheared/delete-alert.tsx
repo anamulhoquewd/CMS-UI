@@ -24,6 +24,7 @@ function DeleteAlert({
   cb: () => void;
 }) {
   const [prompt, setPrompt] = useState(""); // Local state to track the input value
+
   return (
     <AlertDialog
       open={isOpen}
@@ -44,7 +45,7 @@ function DeleteAlert({
         </AlertDialogHeader>
         <br />
         <Label htmlFor="delete" className="font-semibold text-muted-foreground">
-          Please type “DELETE ACCOUNT” below
+          Please type “DELETE” below
         </Label>
         <Input
           id="delete"
@@ -56,15 +57,15 @@ function DeleteAlert({
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction
-            disabled={prompt !== "DELETE ACCOUNT"}
+            disabled={prompt !== "DELETE"}
             onClick={() => {
-              if (prompt === "DELETE ACCOUNT") {
+              if (prompt === "DELETE") {
                 cb();
               }
             }}
             className={`${
-              prompt === "DELETE ACCOUNT" &&
-              "text-destructive bg-destructive-foreground cursor-pointer"
+              prompt === "DELETE" &&
+              "cursor-pointer text-white hover:text-white bg-destructive/90 hover:bg-destructive"
             }`}
           >
             Delete Account

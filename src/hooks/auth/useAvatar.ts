@@ -1,15 +1,36 @@
+import { UserSchema } from "@/interface";
 import api from "@/protectedApi/Interceptor";
-import { useAuth } from "@/store/auth/useAuth";
 import { getStorage } from "@/store/local";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-const useMe = () => {
+const useAvatar = () => {
   const [isAvatarOpen, setIsAvatarOpen] = useState(false);
   const [error, setError] = useState("");
+  const [user, setUser] = useState<UserSchema | null>(null);
 
   // store
-  const user = useAuth((state) => state.user);
-  const updateUserData = useAuth((state) => state.update);
+  // const user = useAuth((state) => state.user);
+  // const updateUserData = useAuth((state) => state.update);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const response = await api.get("/auth/me", {
+          headers: {
+            Authorization: `Bearer ${getStorage("accessToken")}`,
+          },
+        });
+
+        if (response.data.success) {
+          setUser(response.data.data);
+        }
+      } catch (error: any) {
+        console.warn(error);
+      }
+    };
+
+    fetchUser();
+  }, []);
 
   // upload avatar handler
   const uploadHandler = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -29,10 +50,7 @@ const useMe = () => {
     const formData = new FormData();
     formData.append("avatar", file);
 
-    console.log("Called in upload handler. out of try");
-
     try {
-      console.log("Called in upload handler. in try block. before api call");
 
       const response = await api.post(
         `/users/uploads-avatar?filename=${
@@ -47,10 +65,11 @@ const useMe = () => {
         }
       );
 
-      console.log("Called in upload handler. in try block. after api call");
-
       if (response.data.success && user) {
-        updateUserData({ ...user, avatar: response.data.data });
+        setUser({
+          ...user,
+          avatar: response.data.data,
+        });
       }
 
       setIsAvatarOpen(false);
@@ -72,4 +91,4 @@ const useMe = () => {
   };
 };
 
-export default useMe;
+export default useAvatar;
