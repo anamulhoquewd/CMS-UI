@@ -83,8 +83,11 @@ export default function RegistrationForm({
                         "w-full pl-3 text-left font-normal cursor-pointer",
                         !field.value && "text-muted-foreground"
                       )}
+                      disabled={isEditing}
                     >
-                      {selectOrderDate ? (
+                      {isEditing ? (
+                        format(values?.date, "PPP")
+                      ) : selectOrderDate ? (
                         format(selectOrderDate, "PPP")
                       ) : (
                         <span>Pick a date</span>
@@ -129,11 +132,16 @@ export default function RegistrationForm({
                   );
                   field.onChange(value);
                 }}
+                disabled={isEditing}
                 defaultValue={field.value}
               >
                 <FormControl className="w-full cursor-pointer">
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a customer" />
+                    <SelectValue
+                      placeholder={`${
+                        isEditing ? values.customerName : "Select a customer"
+                      }`}
+                    />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>

@@ -31,9 +31,7 @@ const useOrder = () => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerSchema | null>(null);
-
   const [selectOrderDate, setSelectOrderDate] = useState<string>(ISODate());
-
   // Date for filter orders.
   const [selectDate, setSelectDate] = useState<string>(ISODate());
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
@@ -201,7 +199,11 @@ const useOrder = () => {
     }
   }, []);
 
-  const updateOrder = useCallback(async () => {}, []);
+  console.log("Default Values", defaultValues);
+  
+  const updateOrder = useCallback(async () => {
+
+  }, []);
   const deleteOrder = useCallback(async () => {}, []);
 
   // Memoize customers who have not placed orders
