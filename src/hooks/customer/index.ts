@@ -16,7 +16,7 @@ const useCustomer = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDelOpen, setIsDelOpen] = useState(false);
   const [defaultValues, setDefaultValues] = useState(null);
-  const [customerId, setCustomerId] = useState("");
+  const [customerId, setCustomerId] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
     total: 0,
@@ -176,6 +176,12 @@ const useCustomer = () => {
       setIsAddOpen(false);
 
       // Remove values
+      setDefaultValues(null);
+
+      // Update customer ID
+      setCustomerId(null);
+
+      // Update editing status
       setIsEditing(false);
 
       // Update customer table

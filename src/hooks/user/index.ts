@@ -15,7 +15,7 @@ const useUser = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isDelOpen, setIsDelOpen] = useState(false);
   const [defaultValues, setDefaultValues] = useState(null);
-  const [userId, setUserId] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const [pagination, setPagination] = useState<Pagination>({
     page: 1,
     total: 0,
@@ -167,10 +167,16 @@ const useUser = () => {
       // Close modal
       setIsAddOpen(false);
 
+      // Remove values
+      setDefaultValues(null);
+
+      // Update users ID
+      setUserId(null);
+
       // Close delete modal
       setIsDelOpen(false);
 
-      // Update customer table
+      // Update users table
       getUsers();
     } catch (error: any) {
       handleAxiosError(error);
