@@ -7,8 +7,10 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format } from "date-fns";
+import { addDays } from "date-fns";
 import useCustomer from "../customer";
+import { DateRange } from "react-day-picker";
+import { ISODate } from "@/utils/date-converter";
 
 const useOrder = () => {
   const [orders, setOrders] = useState([]);
@@ -29,9 +31,16 @@ const useOrder = () => {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerSchema | null>(null);
-  const [selectedDate, setSelectedDate] = useState<string>(
-    format(new Date(), "yyyy-MM-dd")
-  );
+
+  const [selectOrderDate, setSelectOrderDate] = useState<string>(ISODate());
+
+  // Date for filter orders.
+  const [selectDate, setSelectDate] = useState<string>(ISODate());
+  const [dateRange, setDateRange] = useState<DateRange | undefined>({
+    from: undefined,
+    to: undefined,
+  });
+
   const { customers } = useCustomer();
 
   useEffect(() => {
@@ -45,41 +54,55 @@ const useOrder = () => {
     };
   }, [search]);
 
-  const getOrders = useCallback(async (page = 1, search = "") => {
-    setIsLoading(true);
+  const getOrders = useCallback(
+    async ({
+      page = 1,
+      search = "",
+      date = "",
+      fromDate = "",
+      toDate = "",
+    }) => {
+      setIsLoading(true);
 
-    try {
-      const response = await api.get("/orders", {
-        params: {
-          page,
-          search,
-        },
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      try {
+        const response = await api.get("/orders", {
+          params: {
+            page,
+            search,
+            date: fromDate && toDate ? "" : date,
+            fromDate,
+            toDate,
+            sortBy: "date",
+            sortType: "asc",
+          },
+          headers: {
+            Authorization: `Bearer ${getStorage("accessToken")}`,
+          },
+        });
 
-      if (!response.data.success) {
-        throw new Error(response.data.error.message);
+        if (!response.data.success) {
+          throw new Error(response.data.error.message);
+        }
+
+        console.log("Orders fetched successfully");
+
+        setOrders(response.data.data || []);
+
+        setPagination({
+          page: response.data.pagination.page,
+          total: response.data.pagination.total,
+          totalPages: response.data.pagination.totalPages,
+          nextPage: response.data.pagination.nextPage || null,
+          prevPage: response.data.pagination.prevPage || null,
+        });
+      } catch (error: any) {
+        handleAxiosError(error);
+      } finally {
+        setIsLoading(false);
       }
-
-      console.log("Orders fetched successfully", response.data);
-
-      setOrders(response.data.data || []);
-
-      setPagination({
-        page: response.data.pagination.page,
-        total: response.data.pagination.total,
-        totalPages: response.data.pagination.totalPages,
-        nextPage: response.data.pagination.nextPage || null,
-        prevPage: response.data.pagination.prevPage || null,
-      });
-    } catch (error: any) {
-      handleAxiosError(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   const form = useForm<z.infer<typeof orderRegistrationFormSchema>>({
     resolver: zodResolver(orderRegistrationFormSchema),
@@ -88,7 +111,7 @@ const useOrder = () => {
       price: 0,
       quantity: 1,
       item: "",
-      date: new Date(),
+      date: selectOrderDate,
       note: "",
     },
   });
@@ -105,12 +128,14 @@ const useOrder = () => {
   const createOrder = useCallback(async () => {
     setIsLoading(true);
 
+    console.log("From value date", form.getValues().date);
+
     try {
       const response = await api.post(
         "/orders",
         {
           customerId: form.getValues().customerId,
-          date: format(form.getValues().date, "yyyy-MM-dd"),
+          date: form.getValues().date.split("T")[0],
 
           ...(form.getValues().item && { item: form.getValues().item }),
           ...(form.getValues().price && { price: form.getValues().price }),
@@ -138,7 +163,7 @@ const useOrder = () => {
         price: 0,
         quantity: 1,
         item: "",
-        date: new Date(),
+        date: new Date().toISOString(),
         note: "",
       });
 
@@ -148,11 +173,11 @@ const useOrder = () => {
       // Remove values
       setDefaultValues(null);
 
-      // Update users table
-      getOrders();
+      // Update select date
+      setSelectDate(new Date().toISOString());
 
-      // Update selected date
-      setSelectedDate(format(new Date(), "yyyy-MM-dd"));
+      // Update users table
+      getOrders({ date: selectDate.split("T")[0] });
     } catch (error: any) {
       handleAxiosError(error);
       console.log("Error creating order", error);
@@ -186,29 +211,52 @@ const useOrder = () => {
       orders
         .filter(
           (order: OrderSchema) =>
-            format(order.date, "yyyy-MM-dd") ===
-            format(selectedDate, "yyyy-MM-dd")
+            new Date(order.date).toISOString().split("T")[0] ===
+            new Date(selectOrderDate).toISOString().split("T")[0]
         )
         .map((order: OrderSchema) => order.customerId)
     );
 
-    console.log("Customers with orders", customersWithOrders);
-
     // Filter customers to exclude those who have placed orders on selected day
-    const x = customers.filter(
+    return customers.filter(
       (customer: CustomerSchema) => !customersWithOrders.has(customer._id)
     );
+  }, [orders, customers, selectOrderDate]);
 
-    console.log("Filtered customers", x);
+  const handleNextDay = useCallback(() => {
+    setSelectDate((date) => {
+      const nextDate = addDays(new Date(date), 1);
+      return nextDate.toISOString();
+    });
+  }, []);
 
-    return x;
-  }, [orders, customers, selectedDate]);
+  const handlePrevDay = useCallback(() => {
+    setSelectDate((date) => {
+      const prevDate = addDays(date, -1);
+      return new Date(prevDate).toISOString();
+    });
+  }, []);
 
-  console.log("Selected Date", selectedDate);
+  const handleResetFilter = () => {
+    setDateRange({ from: undefined, to: undefined });
+    setSelectDate(new Date().toISOString());
+    pagination.page = 1;
+    setSearch("");
+  };
 
   useEffect(() => {
-    getOrders(pagination.page, debouncedSearch);
-  }, [pagination.page, debouncedSearch]);
+    getOrders({
+      page: pagination.page,
+      search: debouncedSearch,
+      date: new Date(selectDate).toISOString().split("T")[0],
+      fromDate: dateRange?.from
+        ? new Date(dateRange.from).toISOString().split("T")[0]
+        : undefined,
+      toDate: dateRange?.to
+        ? new Date(dateRange.to).toISOString().split("T")[0]
+        : undefined,
+    });
+  }, [pagination.page, debouncedSearch, selectDate, dateRange]);
 
   return {
     updateOrder,
@@ -229,7 +277,6 @@ const useOrder = () => {
     setOrderId,
     pagination,
     setPagination,
-    search,
     setSearch,
     debouncedSearch,
     setDebouncedSearch,
@@ -238,8 +285,15 @@ const useOrder = () => {
     setSelectedCustomer,
     selectedCustomer,
     filteredCustomers,
-    setSelectedDate,
-    selectedDate,
+    setSelectOrderDate,
+    selectOrderDate,
+    setDateRange,
+    dateRange,
+    setSelectDate,
+    selectDate,
+    handleNextDay,
+    handlePrevDay,
+    handleResetFilter,
   };
 };
 

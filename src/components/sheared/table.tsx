@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon,  } from "lucide-react";
 import {
   TableHead,
   TableHeader,
@@ -32,7 +32,7 @@ interface UsersTableProps {
   setSearch: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function UsersTable({ table, columns, setSearch }: UsersTableProps) {
+function UsersTable({ table, columns, setSearch,  }: UsersTableProps) {
   return (
     <>
       <div className="flex flex-row justify-between items-center py-4 gap-2">
@@ -183,7 +183,7 @@ function UsersTable({ table, columns, setSearch }: UsersTableProps) {
                               )
                             ) : cell.column.id === "date" &&
                               cell.getValue() !== undefined ? (
-                              format(cell.getValue(), "yyyy-MM-dd")
+                              format(new Date(cell.getValue()), "yyyy-MM-dd")
                             ) : cell.column.id === "defaultOffDays" &&
                               cell.getValue() !== undefined ? (
                               <DropdownMenu>

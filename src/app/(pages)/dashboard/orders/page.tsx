@@ -47,7 +47,8 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { addDays, format } from "date-fns";
+import { format } from "date-fns";
+import { ISODate } from "@/utils/date-converter";
 
 export default function OrdersPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -65,10 +66,6 @@ export default function OrdersPage() {
     note: false,
     actions: true,
   });
-  const [date, setDate] = useState({
-    from: new Date(2022, 0, 20),
-    to: addDays(new Date(2022, 0, 20), 20),
-  });
 
   const {
     orders,
@@ -83,6 +80,8 @@ export default function OrdersPage() {
     setSearch,
     form,
     defaultValues: values,
+    handleNextDay,
+    handlePrevDay,
     setPagination,
     pagination,
     isLoading,
@@ -92,8 +91,13 @@ export default function OrdersPage() {
     setSelectedCustomer,
     selectedCustomer,
     filteredCustomers,
-    setSelectedDate,
-    selectedDate,
+    setSelectOrderDate,
+    selectOrderDate,
+    setDateRange,
+    dateRange,
+    setSelectDate,
+    selectDate,
+    handleResetFilter,
   } = useOrder();
 
   const columns = orderColumns({
@@ -159,14 +163,12 @@ export default function OrdersPage() {
             <CardDescription>Manage and view all orders</CardDescription>
           </div>
 
+          {/* filter with date */}
           <div className="flex items-center justify-between w-fit gap-2">
-            <Button
-              // onClick={handlePreviousDay}
-              variant="outline"
-              size="icon"
-            >
+            <Button onClick={handlePrevDay} variant="outline" size="icon">
               <ChevronLeft className="h-4 w-4" />
             </Button>
+
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -174,44 +176,80 @@ export default function OrdersPage() {
                   className="w-40 sm:w-[250px] cursor-pointer"
                 >
                   <CalendarIcon className="mr-2 h-4 w-4 hidden sm:block" />
-                  {format(selectedDate, "PPP")}
+                  {selectDate ? (
+                    format(selectDate, "PPP")
+                  ) : (
+                    <span>Pick a date</span>
+                  )}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0">
                 <Calendar
                   mode="single"
-                  selected={new Date(selectedDate)}
-                  onSelect={(date) => date && setSelectedDate(date)}
+                  selected={new Date(selectDate)}
+                  onSelect={(date) => {
+                    if (date) {
+                      setSelectDate(ISODate(date));
+                    }
+                  }}
+                  // disabled={(date) => date > new Date()}
                   initialFocus
                 />
               </PopoverContent>
             </Popover>
-            <Button variant="outline" size="icon">
+            <Button onClick={handleNextDay} variant="outline" size="icon">
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
 
+          {/* filter with date range */}
           <div className="flex items-center gap-2">
             <div className="flex items-center justify-between w-fit gap-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button id="date" variant={"outline"} className={"w-[150px]"}>
-                    <Filter className="mr-2 h-4 w-4" />
-
+                  <Button
+                    id="date"
+                    variant={"outline"}
+                    className={"w-fit cursor-pointer"}
+                  >
                     <span>Date Range</span>
+
+                    <Filter className="h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     initialFocus
                     mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={setDate}
+                    defaultMonth={new Date()}
+                    selected={
+                      dateRange?.from
+                        ? {
+                            from: new Date(dateRange.from),
+                            to: dateRange.to
+                              ? new Date(dateRange.to)
+                              : undefined,
+                          }
+                        : undefined
+                    }
+                    onSelect={(range) =>
+                      setDateRange({
+                        from: range?.from ? ISODate(range.from) : undefined,
+                        to: range?.to ? ISODate(range.to) : undefined,
+                      })
+                    }
                     numberOfMonths={1}
                   />
                 </PopoverContent>
               </Popover>
+              <Button
+                id="date"
+                variant={"outline"}
+                className={"w-fit cursor-pointer"}
+                onClick={handleResetFilter}
+              >
+                <span>Reset</span>
+              </Button>
             </div>
 
             <Dialog
@@ -223,7 +261,7 @@ export default function OrdersPage() {
                     price: 0,
                     quantity: 1,
                     item: "",
-                    date: new Date(),
+                    date: new Date().toISOString(),
                     note: "",
                   });
                   setValues(null);
@@ -260,8 +298,8 @@ export default function OrdersPage() {
                     customers={filteredCustomers}
                     setSelectedCustomer={setSelectedCustomer}
                     selectedCustomer={selectedCustomer}
-                    setSelectedDate={setSelectedDate}
-                    selectedDate={selectedDate}
+                    setSelectOrderDate={setSelectOrderDate}
+                    selectOrderDate={selectOrderDate}
                   />
                   <ScrollBar orientation="vertical" className="w-2.5" />
                   <ScrollBar orientation="horizontal" className="w-2.5" />
@@ -271,7 +309,11 @@ export default function OrdersPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <UsersTable table={table} columns={columns} setSearch={setSearch} />
+          <UsersTable
+            table={table}
+            columns={columns}
+            setSearch={setSearch}
+          />
           {pagination.total > 0 && (
             <PaginationForTable
               pagination={pagination}

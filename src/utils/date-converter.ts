@@ -33,4 +33,11 @@ const logToShort = (days: string[]) => {
   ); // Remove undefined values
 };
 
-export { shortToLong, logToShort };
+// Convert to UTC+6
+const ISODate: (date?: Date) => string = (date = new Date()) => {
+  const localDate = new Date(date);
+  localDate.setHours(localDate.getHours() + 6); // UTC+6
+  return localDate.toISOString();
+};
+
+export { shortToLong, logToShort, ISODate };

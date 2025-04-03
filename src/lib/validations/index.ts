@@ -100,13 +100,12 @@ const customerRegistrationFormSchema = z.object({
 });
 
 const orderRegistrationFormSchema = z.object({
-  customerId: z
-    .string()
-    .length(24, "Please Select a customer"),
+  customerId: z.string().length(24, "Please Select a customer"),
   price: z.number().min(0),
   quantity: z.number().min(1),
   item: z.enum(["lunch", "dinner", "lunch&dinner", ""]),
-  date: z.date(),
+  date: z
+    .string() ,
   note: z.string().optional(),
 });
 

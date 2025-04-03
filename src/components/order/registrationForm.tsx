@@ -26,6 +26,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 import { format, addDays } from "date-fns";
 import { cn } from "@/lib/utils";
 import { Calendar } from "../ui/calendar";
+import { ISODate } from "@/utils/date-converter";
 
 interface OrderRegistrationFormProps {
   form: any;
@@ -36,8 +37,8 @@ interface OrderRegistrationFormProps {
   customers: CustomerSchema[];
   setSelectedCustomer: (customer: CustomerSchema | null) => void;
   selectedCustomer: CustomerSchema | null;
-  setSelectedDate: (date: string) => void;
-  selectedDate: string;
+  setSelectOrderDate: (date: string) => void;
+  selectOrderDate: string;
 }
 
 export default function RegistrationForm({
@@ -47,9 +48,9 @@ export default function RegistrationForm({
   values,
   isEditing,
   customers,
-  setSelectedDate,
+  setSelectOrderDate,
   setSelectedCustomer,
-  selectedDate,
+  selectOrderDate,
 }: OrderRegistrationFormProps) {
   const [isEditingPrice, setIsEditingPrice] = useState(true);
   const [isEditingQuantity, setIsEditingQuantity] = useState(true);
@@ -72,7 +73,7 @@ export default function RegistrationForm({
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel className="cursor-pointer">Date of birth</FormLabel>
+              <FormLabel className="cursor-pointer">Date of Order</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl className="w-full">
@@ -83,8 +84,8 @@ export default function RegistrationForm({
                         !field.value && "text-muted-foreground"
                       )}
                     >
-                      {selectedDate ? (
-                        format(selectedDate, "yyyy-MM-dd")
+                      {selectOrderDate ? (
+                        format(selectOrderDate, "PPP")
                       ) : (
                         <span>Pick a date</span>
                       )}
@@ -95,11 +96,11 @@ export default function RegistrationForm({
                 <PopoverContent className="w-auto p-0" align="start">
                   <Calendar
                     mode="single"
-                    selected={new Date(selectedDate)}
+                    selected={new Date(selectOrderDate)}
                     onSelect={(date) => {
                       if (date) {
-                        field.onChange(date);
-                        setSelectedDate(format(date, "yyyy-MM-dd"));
+                        setSelectOrderDate(ISODate(date));
+                        field.onChange(ISODate(date)); // Ensure string format is stored
                       }
                     }}
                     disabled={(date) =>
