@@ -22,7 +22,7 @@ import Link from "next/link";
 interface ColumnsProps {
   setIsAddOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
-  setId: React.Dispatch<React.SetStateAction<string>>;
+  setId: React.Dispatch<React.SetStateAction< string | null> >;
   setIsDelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setValues: (values: any) => void;
 }

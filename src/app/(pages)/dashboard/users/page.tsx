@@ -36,24 +36,13 @@ import useUser from "@/hooks/user";
 import DeleteAlert from "@/components/sheared/delete-alert";
 import PaginationForTable from "@/components/sheared/paginationToTable";
 
-// export const metadata: Metadata = {
-//   title: "Customers",
-//   description: "Manage and analyze customers",
-// };
-
 export default function UsersPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     _id: false,
-    name: true,
-    email: true,
-    phone: true,
     address: false,
-    role: true,
     NID: false,
-    active: true,
-    actions: true,
   });
 
   const {
@@ -75,6 +64,7 @@ export default function UsersPage() {
     pagination,
     setPagination,
     setSearch,
+    usersCount,
   } = useUser();
 
   const columns = userColumns({
@@ -110,29 +100,27 @@ export default function UsersPage() {
     },
   });
 
+  console.log("users count", usersCount);
+
   return (
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatsCard
-          title="Total Customers"
-          value={pagination.total.toString() || "0"}
-          description="+10.1% from last month"
+          title="Total Users in System"
+          value={String(usersCount.total)}
+          description={`${usersCount.growthPercentage} from last month`}
           icon="users"
         />
         <StatsCard
-          title="Active Customers"
-          value={
-            users
-              .filter((user: { active: boolean }) => user.active)
-              .length.toString() || "0"
-          }
-          description="+5.2% from last month"
+          title="Active Users in System"
+          value={String(usersCount.active)}
+          description={`${usersCount.activePercentage} Active Users`}
           icon="users"
         />
         <StatsCard
-          title="Customer Increments"
-          value="5"
-          description="+20.1% from last month"
+          title="New users in This Month"
+          value={String(usersCount.currentMonthNew)}
+          description={`${String(usersCount.growth)} from last month`}
           icon="users"
         />
       </div>

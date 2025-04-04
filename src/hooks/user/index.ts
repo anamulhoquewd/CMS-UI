@@ -1,7 +1,8 @@
-import { Pagination } from "@/interface";
+import { Counting, Pagination } from "@/interface";
 import { userRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
+import { defaultPagination } from "@/utils/default";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
@@ -10,19 +11,22 @@ import { z } from "zod";
 
 const useUser = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [usersCount, setUsersCount] = useState<Counting>({
+    active: 0,
+    total: 0,
+    currentMonthNew: 0,
+    prevMonthNew: 0,
+    growth: 0,
+    growthPercentage: "",
+    activePercentage: "",
+  });
   const [users, setUsers] = useState([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDelOpen, setIsDelOpen] = useState(false);
   const [defaultValues, setDefaultValues] = useState(null);
   const [userId, setUserId] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    total: 0,
-    totalPages: 0,
-    nextPage: null,
-    prevPage: null,
-  });
+  const [pagination, setPagination] = useState<Pagination>(defaultPagination);
   const [search, setSearch] = useState(""); // Name or Phone or Email or NID
   const [debouchedSearch, setDebouncedSearch] = useState("");
 
@@ -72,6 +76,30 @@ const useUser = () => {
       setIsLoading(false);
     }
   }, []);
+
+  const getUsersCount = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await api.get("/users/count", {
+        headers: {
+          Authorization: `Bearer ${getStorage("accessToken")}`,
+        },
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error.message);
+      }
+
+      console.log("Users counted");
+
+      setUsersCount(response.data.data || 0);
+    } catch (error) {
+      handleAxiosError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const form = useForm<z.infer<typeof userRegistrationFormSchema>>({
     resolver: zodResolver(userRegistrationFormSchema),
@@ -238,12 +266,14 @@ const useUser = () => {
     getUsers(pagination.page, debouchedSearch);
   }, [pagination.page, debouchedSearch]);
 
+  useEffect(() => {
+    getUsersCount();
+  }, [users]);
+
   return {
     isLoading,
     users,
-
     form,
-
     setIsAddOpen,
     isAddOpen,
     setIsEditing,
@@ -252,11 +282,8 @@ const useUser = () => {
     isDelOpen,
     setDefaultValues,
     defaultValues,
-
     setUserId,
-
     getSingleCustomer,
-
     deleteCustomer,
     updateUsers,
     createUsers,
@@ -264,6 +291,7 @@ const useUser = () => {
     setPagination,
     search,
     setSearch,
+    usersCount,
   };
 };
 

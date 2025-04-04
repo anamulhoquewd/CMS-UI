@@ -45,3 +45,13 @@ export interface OrderSchema {
   date: Date;
   note?: string;
 }
+
+export interface Counting {
+  active: number;
+  total: number;
+  currentMonthNew: number;
+  prevMonthNew: number;
+  growth: number;
+  growthPercentage: string;
+  activePercentage: string;
+}

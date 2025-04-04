@@ -104,8 +104,7 @@ const orderRegistrationFormSchema = z.object({
   price: z.number().min(0),
   quantity: z.number().min(1),
   item: z.enum(["lunch", "dinner", "lunch&dinner", ""]),
-  date: z
-    .string() ,
+  date: z.date(),
   note: z.string().optional(),
 });
 

@@ -1,8 +1,9 @@
-import { Pagination } from "@/interface";
+import { Counting, CustomerSchema, Pagination } from "@/interface";
 import { customerRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
 import { logToShort } from "@/utils/date-converter";
+import { defaultPagination } from "@/utils/default";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useState } from "react";
@@ -10,22 +11,25 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const useCustomer = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [customers, setCustomers] = useState([]);
-  const [isAddOpen, setIsAddOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDelOpen, setIsDelOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [customers, setCustomers] = useState<CustomerSchema[]>([]);
+  const [customersCount, setCustomersCount] = useState<Counting>({
+    active: 0,
+    total: 0,
+    currentMonthNew: 0,
+    prevMonthNew: 0,
+    growth: 0,
+    growthPercentage: "",
+    activePercentage: "",
+  });
+  const [isAddOpen, setIsAddOpen] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isDelOpen, setIsDelOpen] = useState<boolean>(false);
   const [defaultValues, setDefaultValues] = useState(null);
   const [customerId, setCustomerId] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    total: 0,
-    totalPages: 0,
-    nextPage: null,
-    prevPage: null,
-  });
-  const [search, setSearch] = useState(""); // Name or Phone
-  const [debouchedSearch, setDebouncedSearch] = useState("");
+  const [pagination, setPagination] = useState<Pagination>(defaultPagination);
+  const [search, setSearch] = useState<string>(""); // Name or Phone
+  const [debouchedSearch, setDebouncedSearch] = useState<string>("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -71,6 +75,30 @@ const useCustomer = () => {
       setIsLoading(false);
     }
   }, []);
+
+  const getCustomersCount = async () => {
+    setIsLoading(true);
+
+    try {
+      const response = await api.get("/customers/count", {
+        headers: {
+          Authorization: `Bearer ${getStorage("accessToken")}`,
+        },
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error.message);
+      }
+
+      console.log("Customers counted");
+
+      setCustomersCount(response.data.data || 0);
+    } catch (error) {
+      handleAxiosError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const form = useForm<z.infer<typeof customerRegistrationFormSchema>>({
     resolver: zodResolver(customerRegistrationFormSchema),
@@ -246,12 +274,14 @@ const useCustomer = () => {
     getCustomers(pagination.page, debouchedSearch);
   }, [pagination.page, debouchedSearch]);
 
+  useEffect(() => {
+    getCustomersCount();
+  }, [customers]);
+
   return {
     isLoading,
     customers,
-
     form,
-
     setIsAddOpen,
     isAddOpen,
     setIsEditing,
@@ -260,7 +290,6 @@ const useCustomer = () => {
     setCustomerId,
     setDefaultValues,
     defaultValues,
-
     getSingleCustomer,
     createCustomer,
     updateCustomer,
@@ -270,6 +299,7 @@ const useCustomer = () => {
     setPagination,
     search,
     setSearch,
+    customersCount,
   };
 };
 

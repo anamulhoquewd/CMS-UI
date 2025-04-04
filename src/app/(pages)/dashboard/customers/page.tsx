@@ -46,17 +46,9 @@ export default function CustomersPage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     _id: false,
-    name: true,
-    phone: true,
-    address: true,
-    defaultItem: true,
-    defaultPrice: true,
-    defaultQuantity: true,
     defaultOffDays: false,
     paymentStatus: false,
     paymentSystem: false,
-    active: true,
-    actions: true,
   });
 
   const {
@@ -78,6 +70,7 @@ export default function CustomersPage() {
     pagination,
     setPagination,
     setSearch,
+    customersCount,
   } = useCustomer();
 
   const columns = customersColumns({
@@ -117,25 +110,21 @@ export default function CustomersPage() {
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatsCard
-          title="Total Customers"
-          value={customers.length.toString() || "0"}
-          description="+10.1% from last month"
+          title="Total Customers in System"
+          value={String(customersCount.total)}
+          description={`${customersCount.growthPercentage} from last month`}
           icon="users"
         />
         <StatsCard
-          title="Active Customers"
-          value={
-            customers
-              .filter((customer: { active: boolean }) => customer.active)
-              .length.toString() || "0"
-          }
-          description="+5.2% from last month"
+          title="Active Customers in System"
+          value={String(customersCount.active)}
+          description={`${customersCount.activePercentage} Active Customers`}
           icon="users"
         />
         <StatsCard
-          title="Customer Increments"
-          value="5"
-          description="+20.1% from last month"
+          title="Customer Increments in This Month"
+          value={String(customersCount.currentMonthNew)}
+          description={`${String(customersCount.growth)} from last month`}
           icon="users"
         />
       </div>

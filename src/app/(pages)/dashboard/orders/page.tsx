@@ -48,7 +48,6 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
-import { ISODate } from "@/utils/date-converter";
 
 export default function OrdersPage() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -56,15 +55,7 @@ export default function OrdersPage() {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({
     _id: false,
     customerId: false,
-    customerName: true,
-    customerPhone: true,
-    price: true,
-    quantity: true,
-    total: true,
-    item: true,
-    date: true,
     note: false,
-    actions: true,
   });
 
   const {
@@ -91,13 +82,12 @@ export default function OrdersPage() {
     setSelectedCustomer,
     selectedCustomer,
     filteredCustomers,
-    setSelectOrderDate,
-    selectOrderDate,
     setDateRange,
     dateRange,
     setSelectDate,
     selectDate,
     handleResetFilter,
+    ordersCount,
   } = useOrder();
 
   const columns = orderColumns({
@@ -137,21 +127,21 @@ export default function OrdersPage() {
     <div className="flex flex-col gap-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <StatsCard
-          title="Total Customers"
-          value={"0"}
-          description="+10.1% from last month"
+          title="Today's Orders"
+          value={String(ordersCount.todayOrders)}
+          description={`${ordersCount.dailyChange} from yesterday`}
           icon="users"
         />
         <StatsCard
-          title="Active Customers"
-          value={"0"}
-          description="+5.2% from last month"
+          title="Current Month Orders"
+          value={String(ordersCount.currentMonthOrders)}
+          description={`${ordersCount.monthlyChange} from last month`}
           icon="users"
         />
         <StatsCard
-          title="Customer Increments"
-          value="5"
-          description="+20.1% from last month"
+          title="Total Orders"
+          value={String(ordersCount.totalOrders)}
+          description={`${ordersCount.yearlyChange} from last year`}
           icon="users"
         />
       </div>
@@ -187,12 +177,7 @@ export default function OrdersPage() {
                 <Calendar
                   mode="single"
                   selected={new Date(selectDate)}
-                  onSelect={(date) => {
-                    if (date) {
-                      setSelectDate(ISODate(date));
-                    }
-                  }}
-                  // disabled={(date) => date > new Date()}
+                  onSelect={(date) => date && setSelectDate(date)}
                   initialFocus
                 />
               </PopoverContent>
@@ -234,8 +219,12 @@ export default function OrdersPage() {
                     }
                     onSelect={(range) =>
                       setDateRange({
-                        from: range?.from ? ISODate(range.from) : undefined,
-                        to: range?.to ? ISODate(range.to) : undefined,
+                        from: range?.from
+                          ? new Date(format(range.from, "yyyy-MM-dd"))
+                          : undefined,
+                        to: range?.to
+                          ? new Date(format(range.to, "yyyy-MM-dd"))
+                          : undefined,
                       })
                     }
                     numberOfMonths={1}
@@ -261,11 +250,11 @@ export default function OrdersPage() {
                     price: 0,
                     quantity: 1,
                     item: "",
-                    date: new Date().toISOString(),
+                    date: new Date(),
                     note: "",
                   });
                   setValues(null);
-                  setId("");
+                  setId(null);
                   setIsEditing(false);
                 }
                 setIsAddOpen(open);
@@ -298,8 +287,6 @@ export default function OrdersPage() {
                     customers={filteredCustomers}
                     setSelectedCustomer={setSelectedCustomer}
                     selectedCustomer={selectedCustomer}
-                    setSelectOrderDate={setSelectOrderDate}
-                    selectOrderDate={selectOrderDate}
                   />
                   <ScrollBar orientation="vertical" className="w-2.5" />
                   <ScrollBar orientation="horizontal" className="w-2.5" />
@@ -309,11 +296,7 @@ export default function OrdersPage() {
           </div>
         </CardHeader>
         <CardContent>
-          <UsersTable
-            table={table}
-            columns={columns}
-            setSearch={setSearch}
-          />
+          <UsersTable table={table} columns={columns} setSearch={setSearch} />
           {pagination.total > 0 && (
             <PaginationForTable
               pagination={pagination}

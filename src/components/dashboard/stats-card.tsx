@@ -9,7 +9,7 @@ interface StatsCardProps {
 }
 
 export function StatsCard({ title, value, description, icon }: StatsCardProps) {
-  const isPositive = description.includes("+")
+  const isNegative = description.includes("-")
 
   const renderIcon = () => {
     switch (icon) {
@@ -37,12 +37,12 @@ export function StatsCard({ title, value, description, icon }: StatsCardProps) {
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
         <p className="text-xs flex items-center gap-1 mt-1">
-          {isPositive ? (
+          {!isNegative ? (
             <TrendingUp className="h-3 w-3 text-green-500" />
           ) : (
             <TrendingDown className="h-3 w-3 text-red-500" />
           )}
-          <span className={isPositive ? "text-green-500" : "text-red-500"}>{description}</span>
+          <span className={!isNegative ? "text-green-500" : "text-red-500"}>{description}</span>
         </p>
       </CardContent>
     </Card>

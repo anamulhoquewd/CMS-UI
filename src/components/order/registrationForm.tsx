@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -22,11 +22,6 @@ import {
 } from "@/components/ui/select";
 import { DialogFooter } from "@/components/ui/dialog";
 import { CustomerSchema } from "@/interface";
-import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { format, addDays } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Calendar } from "../ui/calendar";
-import { ISODate } from "@/utils/date-converter";
 
 interface OrderRegistrationFormProps {
   form: any;
@@ -37,8 +32,6 @@ interface OrderRegistrationFormProps {
   customers: CustomerSchema[];
   setSelectedCustomer: (customer: CustomerSchema | null) => void;
   selectedCustomer: CustomerSchema | null;
-  setSelectOrderDate: (date: string) => void;
-  selectOrderDate: string;
 }
 
 export default function RegistrationForm({
@@ -48,9 +41,7 @@ export default function RegistrationForm({
   values,
   isEditing,
   customers,
-  setSelectOrderDate,
   setSelectedCustomer,
-  selectOrderDate,
 }: OrderRegistrationFormProps) {
   const [isEditingPrice, setIsEditingPrice] = useState(true);
   const [isEditingQuantity, setIsEditingQuantity] = useState(true);
@@ -68,57 +59,6 @@ export default function RegistrationForm({
         onSubmit={form.handleSubmit(onSubmit)}
         className="space-y-6 w-full px-1"
       >
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel className="cursor-pointer">Date of Order</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl className="w-full">
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full pl-3 text-left font-normal cursor-pointer",
-                        !field.value && "text-muted-foreground"
-                      )}
-                      disabled={isEditing}
-                    >
-                      {isEditing ? (
-                        format(values?.date, "PPP")
-                      ) : selectOrderDate ? (
-                        format(selectOrderDate, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={new Date(selectOrderDate)}
-                    onSelect={(date) => {
-                      if (date) {
-                        setSelectOrderDate(ISODate(date));
-                        field.onChange(ISODate(date)); // Ensure string format is stored
-                      }
-                    }}
-                    disabled={(date) =>
-                      date > addDays(new Date(), 10) ||
-                      date < new Date("2025-01-01")
-                    }
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         <FormField
           control={form.control}
           name="customerId"

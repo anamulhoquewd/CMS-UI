@@ -14,8 +14,6 @@ const refreshToken = async () => {
   try {
     const response = await api.post(`/users/auth/refresh`);
 
-    console.log("response in refresh token function", response);
-
     if (response.data.success) {
       console.log("Refreshed token");
       setStorage("accessToken", response.data.tokens.accessToken);
@@ -60,7 +58,7 @@ api.interceptors.response.use(
           return Promise.reject(error);
         }
 
-        console.log("New access token received:", newAccessToken);
+        console.log("New access token received:");
 
         if (!originalRequest.headers) {
           originalRequest.headers = {};

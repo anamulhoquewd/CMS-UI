@@ -10,30 +10,33 @@ import { z } from "zod";
 import { addDays } from "date-fns";
 import useCustomer from "../customer";
 import { DateRange } from "react-day-picker";
-import { ISODate } from "@/utils/date-converter";
+import { defaultPagination } from "@/utils/default";
+import { format } from "date-fns";
 
 const useOrder = () => {
-  const [orders, setOrders] = useState([]);
+  const [orders, setOrders] = useState<OrderSchema[]>([]);
+  const [ordersCount, setOrdersCount] = useState({
+    dailyChange: "",
+    monthlyChange: "",
+    yearlyChange: "",
+    todayOrders: 0,
+    yesterdayOrders: 0,
+    currentMonthOrders: 0,
+    prevMonthOrders: 0,
+    totalOrders: 0,
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isDelOpen, setIsDelOpen] = useState(false);
   const [defaultValues, setDefaultValues] = useState(null);
   const [orderId, setOrderId] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    total: 0,
-    totalPages: 0,
-    nextPage: null,
-    prevPage: null,
-  });
+  const [pagination, setPagination] = useState<Pagination>(defaultPagination);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedCustomer, setSelectedCustomer] =
     useState<CustomerSchema | null>(null);
-  const [selectOrderDate, setSelectOrderDate] = useState<string>(ISODate());
-  // Date for filter orders.
-  const [selectDate, setSelectDate] = useState<string>(ISODate());
+  const [selectDate, setSelectDate] = useState<Date>(new Date());
   const [dateRange, setDateRange] = useState<DateRange | undefined>({
     from: undefined,
     to: undefined,
@@ -53,11 +56,17 @@ const useOrder = () => {
   }, [search]);
 
   const getOrders = async ({
-    page = 1,
-    search = "",
-    date = "",
-    fromDate = "",
-    toDate = "",
+    page,
+    search,
+    date = new Date(),
+    fromDate,
+    toDate,
+  }: {
+    fromDate?: Date;
+    toDate?: Date;
+    page?: number;
+    search?: string;
+    date?: Date;
   }) => {
     setIsLoading(true);
 
@@ -66,7 +75,7 @@ const useOrder = () => {
         params: {
           page,
           search,
-          date: fromDate && toDate ? "" : date,
+          date: fromDate && toDate ? "" : format(date, "yyyy-MM-dd"),
           fromDate,
           toDate,
           sortBy: "date",
@@ -99,6 +108,26 @@ const useOrder = () => {
     }
   };
 
+  const getOrdersCount = async () => {
+    try {
+      const response = await api.get("/orders/count", {
+        headers: {
+          Authorization: `Bearer ${getStorage("accessToken")}`,
+        },
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error.message);
+      }
+
+      console.log("Orders counted");
+
+      setOrdersCount(response.data.data || 0);
+    } catch (error) {
+      handleAxiosError(error);
+    }
+  };
+
   const form = useForm<z.infer<typeof orderRegistrationFormSchema>>({
     resolver: zodResolver(orderRegistrationFormSchema),
     defaultValues: {
@@ -106,7 +135,7 @@ const useOrder = () => {
       price: 0,
       quantity: 1,
       item: "",
-      date: selectOrderDate,
+      date: selectDate,
       note: "",
     },
   });
@@ -120,7 +149,7 @@ const useOrder = () => {
     }
   }, [selectedCustomer, form]);
 
-  const createOrder = useCallback(async () => {
+  const createOrder = async () => {
     setIsLoading(true);
 
     try {
@@ -128,7 +157,7 @@ const useOrder = () => {
         "/orders",
         {
           customerId: form.getValues().customerId,
-          date: form.getValues().date.split("T")[0],
+          date: format(selectDate, "yyyy-MM-dd"),
 
           ...(form.getValues().item && { item: form.getValues().item }),
           ...(form.getValues().price && { price: form.getValues().price }),
@@ -156,7 +185,7 @@ const useOrder = () => {
         price: 0,
         quantity: 1,
         item: "",
-        date: new Date().toISOString(),
+        date: selectDate,
         note: "",
       });
 
@@ -166,11 +195,8 @@ const useOrder = () => {
       // Remove values
       setDefaultValues(null);
 
-      // Update select date
-      setSelectDate(ISODate());
-
       // Update users table
-      getOrders({ date: selectDate.split("T")[0] });
+      getOrders({ date: selectDate });
     } catch (error: any) {
       handleAxiosError(error);
       console.log("Error creating order", error);
@@ -192,7 +218,7 @@ const useOrder = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   const updateOrder = async () => {
     // Loading spinner start
@@ -217,7 +243,7 @@ const useOrder = () => {
         price: 0,
         quantity: 1,
         item: "",
-        date: new Date().toISOString(),
+        date: new Date(),
         note: "",
       });
 
@@ -234,7 +260,7 @@ const useOrder = () => {
       setOrderId(null);
 
       // Update users table
-      getOrders({ date: selectDate.split("T")[0] });
+      getOrders({ date: selectDate });
     } catch (error: any) {
       handleAxiosError(error);
       console.log("Error while updating order", error);
@@ -282,7 +308,7 @@ const useOrder = () => {
       setOrderId(null);
 
       // Update users table
-      getOrders({ date: selectDate.split("T")[0] });
+      getOrders({ date: selectDate });
     } catch (error: any) {
       handleAxiosError(error);
       console.log("Error while deleting order", error);
@@ -297,36 +323,54 @@ const useOrder = () => {
     // Collect customer IDs from filteredOrders
     const customersWithOrders = new Set(
       orders
-        .filter(
-          (order: OrderSchema) =>
-            ISODate(order.date).split("T")[0] === selectOrderDate.split("T")[0]
-        )
+        .filter((order: OrderSchema) => {
+          console.warn("Order date:", order.date);
+          console.warn("Selected date:", selectDate);
+
+          // Check if the order date matches the selected date
+          return (
+            format(order.date, "yyyy-MM-dd") ===
+            format(
+              new Date(
+                selectDate.getFullYear(),
+                selectDate.getMonth(),
+                selectDate.getDate(),
+                6,
+                0,
+                0 // 6:00:00 AM
+              ),
+              "yyyy-MM-dd"
+            )
+          );
+        })
         .map((order: OrderSchema) => order.customerId)
     );
+
+    console.warn("Customers with orders:", customersWithOrders);
 
     // Filter customers to exclude those who have placed orders on selected day
     return customers.filter(
       (customer: CustomerSchema) => !customersWithOrders.has(customer._id)
     );
-  }, [orders, customers, selectOrderDate]);
+  }, [orders, customers, selectDate]);
 
   const handleNextDay = useCallback(() => {
     setSelectDate((date) => {
       const nextDate = addDays(new Date(date), 1);
-      return nextDate.toISOString();
+      return nextDate;
     });
   }, []);
 
   const handlePrevDay = useCallback(() => {
     setSelectDate((date) => {
       const prevDate = addDays(date, -1);
-      return new Date(prevDate).toISOString();
+      return new Date(prevDate);
     });
   }, []);
 
   const handleResetFilter = () => {
     setDateRange({ from: undefined, to: undefined });
-    setSelectDate(new Date().toISOString());
+    setSelectDate(new Date());
     pagination.page = 1;
     setSearch("");
   };
@@ -335,15 +379,15 @@ const useOrder = () => {
     getOrders({
       page: pagination.page,
       search: debouncedSearch,
-      date: new Date(selectDate).toISOString().split("T")[0],
-      fromDate: dateRange?.from
-        ? new Date(dateRange.from).toISOString().split("T")[0]
-        : undefined,
-      toDate: dateRange?.to
-        ? new Date(dateRange.to).toISOString().split("T")[0]
-        : undefined,
+      date: selectDate,
+      fromDate: dateRange?.from ? dateRange.from : undefined,
+      toDate: dateRange?.to ? dateRange.to : undefined,
     });
   }, [pagination.page, debouncedSearch, selectDate, dateRange]);
+
+  useEffect(() => {
+    getOrdersCount();
+  }, [orders]);
 
   return {
     updateOrder,
@@ -372,8 +416,6 @@ const useOrder = () => {
     setSelectedCustomer,
     selectedCustomer,
     filteredCustomers,
-    setSelectOrderDate,
-    selectOrderDate,
     setDateRange,
     dateRange,
     setSelectDate,
@@ -381,6 +423,7 @@ const useOrder = () => {
     handleNextDay,
     handlePrevDay,
     handleResetFilter,
+    ordersCount,
   };
 };
 
