@@ -28,11 +28,13 @@ export default function RegistrationForm({
   onSubmit,
   isLoading,
   values,
+  isEditing,
 }: {
   values: any;
   form: any;
   onSubmit: any;
   isLoading: boolean;
+  isEditing: boolean;
 }) {
   // Reset form with default values of the customer. it's for editing purpose.
   useEffect(() => {
@@ -169,6 +171,8 @@ export default function RegistrationForm({
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Submitting...
               </>
+            ) : isEditing ? (
+              "Update"
             ) : (
               "Register"
             )}

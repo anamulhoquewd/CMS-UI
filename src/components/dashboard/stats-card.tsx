@@ -1,32 +1,48 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ShoppingCart, Users, User, DollarSign, CreditCard, Activity, TrendingUp, TrendingDown } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  ShoppingCart,
+  Users,
+  User,
+  DollarSign,
+  CreditCard,
+  Activity,
+  TrendingUp,
+  TrendingDown,
+} from "lucide-react";
 
 interface StatsCardProps {
-  title: string
-  value: string
-  description: string
-  icon: string
+  title: string;
+  value: string;
+  description: string;
+  icon: string;
+  plaintext?: boolean;
 }
 
-export function StatsCard({ title, value, description, icon }: StatsCardProps) {
-  const isNegative = description.includes("-")
+export function StatsCard({
+  title,
+  value,
+  description,
+  icon,
+  plaintext = false,
+}: StatsCardProps) {
+  const isNegative = description.includes("-");
 
   const renderIcon = () => {
     switch (icon) {
       case "shopping-cart":
-        return <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+        return <ShoppingCart className="h-4 w-4 text-muted-foreground" />;
       case "users":
-        return <Users className="h-4 w-4 text-muted-foreground" />
+        return <Users className="h-4 w-4 text-muted-foreground" />;
       case "user":
-        return <User className="h-4 w-4 text-muted-foreground" />
+        return <User className="h-4 w-4 text-muted-foreground" />;
       case "dollar-sign":
-        return <DollarSign className="h-4 w-4 text-muted-foreground" />
+        return <DollarSign className="h-4 w-4 text-muted-foreground" />;
       case "credit-card":
-        return <CreditCard className="h-4 w-4 text-muted-foreground" />
+        return <CreditCard className="h-4 w-4 text-muted-foreground" />;
       default:
-        return <Activity className="h-4 w-4 text-muted-foreground" />
+        return <Activity className="h-4 w-4 text-muted-foreground" />;
     }
-  }
+  };
 
   return (
     <Card>
@@ -37,15 +53,22 @@ export function StatsCard({ title, value, description, icon }: StatsCardProps) {
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
         <p className="text-xs flex items-center gap-1 mt-1">
-          {!isNegative ? (
+          {plaintext ? (
+            ""
+          ) : !isNegative ? (
             <TrendingUp className="h-3 w-3 text-green-500" />
           ) : (
             <TrendingDown className="h-3 w-3 text-red-500" />
           )}
-          <span className={!isNegative ? "text-green-500" : "text-red-500"}>{description}</span>
+          <span
+            className={
+              plaintext ? "" : !isNegative ? "text-green-500" : "text-red-500"
+            }
+          >
+            {description}
+          </span>
         </p>
       </CardContent>
     </Card>
-  )
+  );
 }
-

@@ -1,24 +1,22 @@
-import { Counting, Pagination } from "@/interface";
+import { Pagination } from "@/interface";
 import { userRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
 import { defaultPagination } from "@/utils/default";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const useUser = () => {
   const [isLoading, setIsLoading] = useState(false);
-  const [usersCount, setUsersCount] = useState<Counting>({
+  const [usersCount, setUsersCount] = useState({
     active: 0,
     total: 0,
-    currentMonthNew: 0,
-    prevMonthNew: 0,
-    growth: 0,
-    growthPercentage: "",
-    activePercentage: "",
+    admins: 0,
+    super_admin: 0,
+    managers: 0,
   });
   const [users, setUsers] = useState([]);
   const [isAddOpen, setIsAddOpen] = useState(false);
@@ -29,6 +27,9 @@ const useUser = () => {
   const [pagination, setPagination] = useState<Pagination>(defaultPagination);
   const [search, setSearch] = useState(""); // Name or Phone or Email or NID
   const [debouchedSearch, setDebouncedSearch] = useState("");
+  const [filterWithStatus, setFilterWithStatus] = useState<
+    "active" | "inactive" | ""
+  >("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -41,14 +42,18 @@ const useUser = () => {
     };
   }, [search]);
 
-  const getUsers = useCallback(async (page = 1, search = "") => {
+  const getUsers = async (page = 1, search = "", status = "") => {
     setIsLoading(true);
+
+    const active =
+      status === "active" ? true : status === "inactive" ? false : "";
 
     try {
       const response = await api.get("/users", {
         params: {
           search,
           page,
+          active,
         },
         headers: {
           Authorization: `Bearer ${getStorage("accessToken")}`,
@@ -75,7 +80,7 @@ const useUser = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   const getUsersCount = async () => {
     setIsLoading(true);
@@ -90,8 +95,6 @@ const useUser = () => {
       if (!response.data.success) {
         throw new Error(response.data.error.message);
       }
-
-      console.log("Users counted");
 
       setUsersCount(response.data.data || 0);
     } catch (error) {
@@ -263,8 +266,8 @@ const useUser = () => {
   const getSingleCustomer = async () => {};
 
   useEffect(() => {
-    getUsers(pagination.page, debouchedSearch);
-  }, [pagination.page, debouchedSearch]);
+    getUsers(pagination.page, debouchedSearch, filterWithStatus);
+  }, [pagination.page, debouchedSearch, filterWithStatus]);
 
   useEffect(() => {
     getUsersCount();
@@ -292,6 +295,7 @@ const useUser = () => {
     search,
     setSearch,
     usersCount,
+    setFilterWithStatus,
   };
 };
 

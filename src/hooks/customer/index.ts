@@ -1,4 +1,4 @@
-import { Counting, CustomerSchema, Pagination } from "@/interface";
+import { CustomerSchema, Pagination } from "@/interface";
 import { customerRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
@@ -6,14 +6,14 @@ import { logToShort } from "@/utils/date-converter";
 import { defaultPagination } from "@/utils/default";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const useCustomer = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [customers, setCustomers] = useState<CustomerSchema[]>([]);
-  const [customersCount, setCustomersCount] = useState<Counting>({
+  const [customersCount, setCustomersCount] = useState({
     active: 0,
     total: 0,
     currentMonthNew: 0,
@@ -30,6 +30,9 @@ const useCustomer = () => {
   const [pagination, setPagination] = useState<Pagination>(defaultPagination);
   const [search, setSearch] = useState<string>(""); // Name or Phone
   const [debouchedSearch, setDebouncedSearch] = useState<string>("");
+  const [filterWithStatus, setFilterWithStatus] = useState<
+    "active" | "inactive" | ""
+  >("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -41,18 +44,23 @@ const useCustomer = () => {
     };
   }, [search]);
 
-  const getCustomers = useCallback(async (page = 1, search = "") => {
+  const getCustomers = async (page = 1, search = "", status = "") => {
     setIsLoading(true);
 
+    const active =
+      status === "active" ? true : status === "inactive" ? false : "";
+
     try {
-      const response = await api.get(
-        `/customers?page=${page}&search=${search}`,
-        {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        }
-      );
+      const response = await api.get(`/customers`, {
+        params: {
+          search,
+          page,
+          active,
+        },
+        headers: {
+          Authorization: `Bearer ${getStorage("accessToken")}`,
+        },
+      });
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -74,7 +82,7 @@ const useCustomer = () => {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  };
 
   const getCustomersCount = async () => {
     setIsLoading(true);
@@ -271,8 +279,8 @@ const useCustomer = () => {
   const getSingleCustomer = async () => {};
 
   useEffect(() => {
-    getCustomers(pagination.page, debouchedSearch);
-  }, [pagination.page, debouchedSearch]);
+    getCustomers(pagination.page, debouchedSearch, filterWithStatus);
+  }, [pagination.page, debouchedSearch, filterWithStatus]);
 
   useEffect(() => {
     getCustomersCount();
@@ -300,6 +308,7 @@ const useCustomer = () => {
     search,
     setSearch,
     customersCount,
+    setFilterWithStatus,
   };
 };
 

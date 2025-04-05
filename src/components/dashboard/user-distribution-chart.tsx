@@ -7,13 +7,20 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/chart";
 
-const data = [
-  { name: "SuperAdmins", value: 1 },
-  { name: "Admins", value: 24 },
-  { name: "Managers", value: 36 },
-];
-
-export function UserDistributionChart() {
+export function UserDistributionChart({
+  super_admin,
+  admins,
+  managers,
+}: {
+  super_admin: number;
+  admins: number;
+  managers: number;
+}) {
+  const data = [
+    { name: "SuperAdmins", value: super_admin },
+    { name: "Admins", value: admins },
+    { name: "Managers", value: managers },
+  ];
   return (
     <ChartContainer
       config={{
