@@ -61,7 +61,7 @@ function LoginForm() {
                       <span>Password</span>
                       <Link
                         href="/auth/forgot-password"
-                        className="text-xs text-primary hover:underline"
+                        className="text-xs text-primary underline"
                       >
                         Forgot password?
                       </Link>

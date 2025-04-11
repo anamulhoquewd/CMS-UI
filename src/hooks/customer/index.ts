@@ -108,6 +108,31 @@ const useCustomer = () => {
     }
   };
 
+  const getCustomerById = async (id: string) => {
+    setIsLoading(true);
+
+    try {
+      const response = await api.get(`/customers/${id}`, {
+        headers: {
+          Authorization: `Bearer ${getStorage("accessToken")}`,
+        },
+      });
+
+      if (!response.data.success) {
+        throw new Error(response.data.error.message);
+      }
+
+      console.log("Customer fetched successfully");
+
+      return response.data.data;
+    } catch (error) {
+      console.log("Error while getting customer", error);
+      handleAxiosError(error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const form = useForm<z.infer<typeof customerRegistrationFormSchema>>({
     resolver: zodResolver(customerRegistrationFormSchema),
     defaultValues: {
@@ -149,7 +174,18 @@ const useCustomer = () => {
       console.log("Customer created successfully");
 
       // Reset form
-      form.reset();
+      form.reset({
+        name: "",
+        phone: "",
+        address: "",
+        defaultPrice: 0,
+        defaultQuantity: 1,
+        defaultOffDays: [],
+        paymentStatus: "pending",
+        defaultItem: "lunch",
+        paymentSystem: "weekly",
+        active: true,
+      });
 
       // Close modal
       setIsAddOpen(false);
@@ -276,8 +312,6 @@ const useCustomer = () => {
     }
   };
 
-  const getSingleCustomer = async () => {};
-
   useEffect(() => {
     getCustomers(pagination.page, debouchedSearch, filterWithStatus);
   }, [pagination.page, debouchedSearch, filterWithStatus]);
@@ -298,7 +332,6 @@ const useCustomer = () => {
     setCustomerId,
     setDefaultValues,
     defaultValues,
-    getSingleCustomer,
     createCustomer,
     updateCustomer,
     deleteCustomer,
@@ -309,6 +342,7 @@ const useCustomer = () => {
     setSearch,
     customersCount,
     setFilterWithStatus,
+    getCustomerById,
   };
 };
 

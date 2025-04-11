@@ -1,12 +1,9 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,29 +20,23 @@ import {
 import { DialogFooter } from "@/components/ui/dialog";
 import { CustomerSchema } from "@/interface";
 
-interface OrderRegistrationFormProps {
-  form: any;
-  onSubmit: any;
-  isLoading: boolean;
-  values: any;
-  isEditing: boolean;
-  customers: CustomerSchema[];
-  setSelectedCustomer: (customer: CustomerSchema | null) => void;
-  selectedCustomer: CustomerSchema | null;
-}
-
 export default function RegistrationForm({
   form,
   onSubmit,
   isLoading,
   values,
   isEditing,
-  customers,
   setSelectedCustomer,
-}: OrderRegistrationFormProps) {
-  const [isEditingPrice, setIsEditingPrice] = useState(true);
-  const [isEditingQuantity, setIsEditingQuantity] = useState(true);
-
+  customerIds,
+}: {
+  values: any;
+  form: any;
+  onSubmit: any;
+  isLoading: boolean;
+  isEditing: boolean;
+  setSelectedCustomer: (customer: CustomerSchema) => void;
+  customerIds: CustomerSchema[];
+}) {
   // Reset form with default values of the customer. it's for editing purpose.
   useEffect(() => {
     if (values) {
@@ -68,7 +59,9 @@ export default function RegistrationForm({
               <Select
                 onValueChange={(value) => {
                   setSelectedCustomer(
-                    customers.find((customer) => customer._id === value) || null
+                    customerIds.find(
+                      (customer) => customer._id === value
+                    ) as CustomerSchema
                   );
                   field.onChange(value);
                 }}
@@ -85,7 +78,7 @@ export default function RegistrationForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {customers.map((customer) => (
+                  {customerIds.map((customer) => (
                     <SelectItem
                       className="cursor-pointer"
                       key={customer._id}
@@ -100,75 +93,33 @@ export default function RegistrationForm({
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
-          name="price"
+          name="amount"
           render={({ field }) => (
             <FormItem>
-              <FormLabel
-                onClick={() => setIsEditingPrice(false)}
-                className="cursor-pointer"
-              >
-                Price
-              </FormLabel>
+              <FormLabel>Amount</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="100"
+                  placeholder="Enter amount"
                   type="number"
                   min="0"
                   {...field}
                   onChange={(e) =>
                     field.onChange(e.target.value ? Number(e.target.value) : 0)
                   }
-                  disabled={isEditingPrice}
                 />
               </FormControl>
-              <FormDescription>
-                If you want to change the price, click on the label.
-              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-
         <FormField
           control={form.control}
-          name="quantity"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel
-                onClick={() => setIsEditingQuantity(false)}
-                className="cursor-pointer"
-              >
-                Quantity
-              </FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="10"
-                  type="number"
-                  min="1"
-                  {...field}
-                  onChange={(e) =>
-                    field.onChange(e.target.value ? Number(e.target.value) : 0)
-                  }
-                  disabled={isEditingQuantity}
-                />
-              </FormControl>
-              <FormDescription>
-                If you want to change the quantity, click on the label.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="item"
+          name="paymentMethod"
           render={({ field }) => (
             <FormItem className="w-full">
-              <FormLabel className="cursor-pointer">Item</FormLabel>
+              <FormLabel className="cursor-pointer">Methods</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl className="w-full">
                   <SelectTrigger className="cursor-pointer">
@@ -178,14 +129,17 @@ export default function RegistrationForm({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem className="cursor-pointer" value="lunch">
-                    Lunch
+                  <SelectItem className="cursor-pointer" value="cash">
+                    Cash
                   </SelectItem>
-                  <SelectItem className="cursor-pointer" value="dinner">
-                    Dinner
+                  <SelectItem className="cursor-pointer" value="bank">
+                    Bank
                   </SelectItem>
-                  <SelectItem className="cursor-pointer" value="lunch&dinner">
-                    Lunch & Dinner
+                  <SelectItem className="cursor-pointer" value="bkash">
+                    Bkash
+                  </SelectItem>
+                  <SelectItem className="cursor-pointer" value="nagad">
+                    Nagad
                   </SelectItem>
                 </SelectContent>
               </Select>
@@ -194,6 +148,90 @@ export default function RegistrationForm({
           )}
         />
 
+        {form.watch("paymentMethod") === "cash" && (
+          <FormField
+            control={form.control}
+            name="cashReceivedBy"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="cursor-pointer">Received By</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter receiver name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {(form.watch("paymentMethod") === "bkash" ||
+          form.watch("paymentMethod") === "nagad" ||
+          form.watch("paymentMethod") === "bank") && (
+          <FormField
+            control={form.control}
+            name="transactionId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="cursor-pointer">Transaction ID</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter transaction ID" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {form.watch("paymentMethod") === "bkash" && (
+          <FormField
+            control={form.control}
+            name="bkashNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="cursor-pointer">Bkash Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter Bkash number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {form.watch("paymentMethod") === "nagad" && (
+          <FormField
+            control={form.control}
+            name="nagadNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="cursor-pointer">Nagad Number</FormLabel>
+                <FormControl>
+                  <Input placeholder="Enter Nagad number" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
+        {form.watch("paymentMethod") === "bank" && (
+          <>
+            <FormField
+              control={form.control}
+              name="bankName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="cursor-pointer">Bank Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter bank name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
         <FormField
           control={form.control}
           name="note"
@@ -201,7 +239,7 @@ export default function RegistrationForm({
             <FormItem>
               <FormLabel className="cursor-pointer">Note</FormLabel>
               <FormControl>
-                <Input placeholder="Any note" type="text" {...field} />
+                <Input placeholder="Enter any additional notes" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -218,7 +256,7 @@ export default function RegistrationForm({
             ) : isEditing ? (
               "Update"
             ) : (
-              "Submit"
+              "Register"
             )}
           </Button>
         </DialogFooter>

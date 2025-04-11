@@ -3,12 +3,14 @@ import api from "@/protectedApi/Interceptor";
 import { setStorage } from "@/store/local";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
-// import { jwtDecode } from "jwt-decode";
+import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const useLogin = () => {
+  const searchParams = useSearchParams()
+  const redirectTo = searchParams.get('from') || '/dashboard' // Default fallback
   const [isLoading, setIsLoading] = useState(false);
   // const { login } = useAuth();
 
@@ -25,8 +27,6 @@ const useLogin = () => {
     setIsLoading(true);
 
     try {
-      console.log("data", data);
-
       // Send login request
       const response = await api.post(`/users/auth/login`, {
         ...(data.email.includes("@")
@@ -35,7 +35,7 @@ const useLogin = () => {
         password: data.password,
       });
 
-      console.log("response", response);
+      console.log("response");
 
       // if response is successful
 
@@ -48,31 +48,11 @@ const useLogin = () => {
       // Set access token in local storage
       setStorage("accessToken", accessToken);
 
-      // Decode access token
-      // const { id }: { id: string } = jwtDecode(accessToken);
-
-      // Get user data from API
-      // const res = await api.get(`/users/${id}`);
-      // const user: UserSchema = res.data.data;
-
-      // Set user in Zustand store
-      // login({
-      //   NID: user.NID,
-      //   address: user.address,
-      //   active: user.active,
-      //   email: user.email,
-      //   name: user.name,
-      //   phone: user.phone,
-      //   role: user.role,
-      //   id: user.id,
-      //   avatar: user.avatar || "",
-      // });
-
       // Clear form
       form.reset();
 
       // Redirect to home page
-      window.location.href = "/";
+      window.location.href = redirectTo
     } catch (error: any) {
       // Handle error
       handleAxiosError(error);

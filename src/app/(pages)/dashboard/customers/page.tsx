@@ -1,4 +1,4 @@
-import Index from "@/components/customer";
+import Index from "@/components/customers";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {

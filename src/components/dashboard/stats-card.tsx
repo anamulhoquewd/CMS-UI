@@ -1,9 +1,9 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   ShoppingCart,
   Users,
   User,
-  DollarSign,
   CreditCard,
   Activity,
   TrendingUp,
@@ -14,8 +14,9 @@ interface StatsCardProps {
   title: string;
   value: string;
   description: string;
-  icon: string;
+  icon: "shopping-cart" | "users" | "user" | "credit-card";
   plaintext?: boolean;
+  className?: string;
 }
 
 export function StatsCard({
@@ -24,6 +25,7 @@ export function StatsCard({
   description,
   icon,
   plaintext = false,
+  className,
 }: StatsCardProps) {
   const isNegative = description.includes("-");
 
@@ -35,8 +37,6 @@ export function StatsCard({
         return <Users className="h-4 w-4 text-muted-foreground" />;
       case "user":
         return <User className="h-4 w-4 text-muted-foreground" />;
-      case "dollar-sign":
-        return <DollarSign className="h-4 w-4 text-muted-foreground" />;
       case "credit-card":
         return <CreditCard className="h-4 w-4 text-muted-foreground" />;
       default:
@@ -62,7 +62,11 @@ export function StatsCard({
           )}
           <span
             className={
-              plaintext ? "" : !isNegative ? "text-green-500" : "text-red-500"
+              plaintext
+                ? cn("text-gray-500", className)
+                : !isNegative
+                ? "text-green-500"
+                : "text-red-500"
             }
           >
             {description}

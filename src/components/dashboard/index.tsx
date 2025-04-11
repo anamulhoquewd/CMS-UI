@@ -8,23 +8,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Overview } from "@/components/dashboard/overview";
 import { StatsCard } from "@/components/dashboard/stats-card";
-import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { UserDistributionChart } from "@/components/dashboard/user-distribution-chart";
 import useCustomer from "@/hooks/customer";
 import useOrder from "@/hooks/order";
 import useUser from "@/hooks/user";
+import usePayment from "@/hooks/payment";
 
 function Index() {
-    const { customersCount } = useCustomer();
+  const { customersCount } = useCustomer();
   const { ordersCount } = useOrder();
   const { usersCount } = useUser();
+  const { paymentsCount } = usePayment();
 
   return (
     <>
-       {/* Stats cards */}
+      {/* Stats cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
         <StatsCard
           title="Today's Orders"
@@ -53,9 +53,9 @@ function Index() {
         />
         <StatsCard
           title="Total Revenue"
-          value={String(usersCount.total)}
-          description={`revenue from last month`}
-          icon="dollar-sign"
+          value={String(paymentsCount.totalAmounts)}
+          description={`${paymentsCount.monthlyTransaction} from last month`}
+          icon="credit-card"
         />
       </div>
 
@@ -78,7 +78,7 @@ function Index() {
               </CardHeader>
               <CardContent className="px-2">
                 <ScrollArea className="w-full overflow-x-auto">
-                  <RevenueChart />
+                  {/* <RevenueChart /> */}
                   <ScrollBar orientation="horizontal" className="mt-1" />
                 </ScrollArea>
               </CardContent>
@@ -108,7 +108,7 @@ function Index() {
               </CardHeader>
               <CardContent className="px-2">
                 <ScrollArea className="w-full overflow-x-auto">
-                  <Overview />
+                  {/* <Overview /> */}
                   <ScrollBar orientation="horizontal" className="mt-1" />
                 </ScrollArea>
               </CardContent>
@@ -151,7 +151,7 @@ function Index() {
         </TabsContent>
       </Tabs>
     </>
-  )
+  );
 }
 
-export default Index
+export default Index;

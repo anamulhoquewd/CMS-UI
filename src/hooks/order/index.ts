@@ -8,10 +8,10 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { addDays } from "date-fns";
-import useCustomer from "../customer";
 import { DateRange } from "react-day-picker";
 import { defaultPagination } from "@/utils/default";
 import { format } from "date-fns";
+import useCustomer from "../customer";
 
 const useOrder = () => {
   const [orders, setOrders] = useState<OrderSchema[]>([]);
@@ -41,6 +41,8 @@ const useOrder = () => {
     from: undefined,
     to: undefined,
   });
+  const [totalLunch, setTotalLunch] = useState(0);
+  const [totalDinner, setTotalDinner] = useState(0);
 
   const { customers } = useCustomer();
 
@@ -125,6 +127,7 @@ const useOrder = () => {
       setOrdersCount(response.data.data || 0);
     } catch (error) {
       handleAxiosError(error);
+      console.log("Error while getting orders count", error);
     }
   };
 
@@ -202,7 +205,6 @@ const useOrder = () => {
       console.log("Error creating order", error);
 
       // Set error message
-      // Set form errors
       if (error.response && error.response.data) {
         const res = error.response.data;
 
@@ -324,9 +326,6 @@ const useOrder = () => {
     const customersWithOrders = new Set(
       orders
         .filter((order: OrderSchema) => {
-          console.warn("Order date:", order.date);
-          console.warn("Selected date:", selectDate);
-
           // Check if the order date matches the selected date
           return (
             format(order.date, "yyyy-MM-dd") ===
@@ -345,8 +344,6 @@ const useOrder = () => {
         })
         .map((order: OrderSchema) => order.customerId)
     );
-
-    console.warn("Customers with orders:", customersWithOrders);
 
     // Filter customers to exclude those who have placed orders on selected day
     return customers.filter(
@@ -375,6 +372,33 @@ const useOrder = () => {
     setSearch("");
   };
 
+  // Calculate lunch and dinner quantity
+  const totalQuantity = () => {
+    const lunchesAndDinners = orders.reduce((total, order) => {
+      if (order.item === "lunch&dinner") {
+        return total + order.quantity;
+      }
+      return total;
+    }, 0);
+
+    const lunches = orders.reduce((total, order) => {
+      if (order.item === "lunch") {
+        return total + order.quantity;
+      }
+      return total;
+    }, lunchesAndDinners / 2);
+
+    const dinners = orders.reduce((total, order) => {
+      if (order.item === "dinner") {
+        return total + order.quantity;
+      }
+      return total;
+    }, lunchesAndDinners / 2);
+
+    setTotalDinner(dinners);
+    setTotalLunch(lunches);
+  };
+
   useEffect(() => {
     getOrders({
       page: pagination.page,
@@ -383,10 +407,12 @@ const useOrder = () => {
       fromDate: dateRange?.from ? dateRange.from : undefined,
       toDate: dateRange?.to ? dateRange.to : undefined,
     });
+    totalQuantity();
   }, [pagination.page, debouncedSearch, selectDate, dateRange]);
 
   useEffect(() => {
     getOrdersCount();
+    totalQuantity();
   }, [orders]);
 
   return {
@@ -424,6 +450,8 @@ const useOrder = () => {
     handlePrevDay,
     handleResetFilter,
     ordersCount,
+    totalLunch,
+    totalDinner,
   };
 };
 

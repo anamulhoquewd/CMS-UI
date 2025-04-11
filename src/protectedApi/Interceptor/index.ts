@@ -1,5 +1,5 @@
 // import { useAuth } from "@/store/auth/useAuth";
-import { removeStorage, setStorage } from "@/store/local";
+import { getStorage, removeStorage, setStorage } from "@/store/local";
 import axios from "axios";
 
 const baseURL =
@@ -8,70 +8,39 @@ const baseURL =
 const api = axios.create({
   baseURL,
   withCredentials: true,
+  headers: {
+    Authorization: `Bearer ${getStorage("accessToken")}`,
+  },
 });
 
-const refreshToken = async () => {
-  try {
-    const response = await api.post(`/users/auth/refresh`);
-
-    if (response.data.success) {
-      console.log("Refreshed token");
-      setStorage("accessToken", response.data.tokens.accessToken);
-      return response.data.tokens.accessToken;
-    }
-
-    return null;
-  } catch (error: any) {
-    console.error("Failed to refresh token", error);
-    return null;
-  }
-};
-
-// Interceptor - Token Refresh or Redirect
+// Response interceptor for token refresh
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    console.log("Error in interceptor:", error);
-
-    // Check if the error is due to an expired access token (401 Unauthorized)
-    if (error.response?.status === 401 && !originalRequest?._retry) {
-      originalRequest._retry = true; // Mark the request as retried
-      console.error("Access token expired. Attempting to refresh...");
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
 
       try {
         const newAccessToken = await refreshToken();
 
-        if (!newAccessToken) {
-          console.error(
-            "Refresh token invalid or expired. Redirecting to login..."
-          );
-          removeStorage("accessToken");
-
-          // const logout = useAuth.getState().logout;
-          // logout();
-
-          // await api.post("/users/auth/logout");
-
-          window.location.href = "/auth/sign-in"; // Redirect to login
-          return Promise.reject(error);
+        if (newAccessToken) {
+          // console.log("Token refreshed");
+          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+          return api(originalRequest);
         }
-
-        console.log("New access token received:");
-
-        if (!originalRequest.headers) {
-          originalRequest.headers = {};
-        }
-        originalRequest.headers["Authorization"] = `Bearer ${newAccessToken}`;
-
-        return api(originalRequest);
-      } catch (refreshError) {
-        console.error("Refresh token expired or invalid:", refreshError);
 
         removeStorage("accessToken");
+        // window.location.href = "/auth/sign-in";
 
-        window.location.href = "/auth/sign-in"; // Redirect to login
+        return Promise.reject(new Error("Session expired please login again"));
+      } catch (refreshError) {
+        // console.error("Failed to refresh token", refreshError);
+
+        removeStorage("accessToken");
+        // window.location.href = "/auth/sign-in";
+
         return Promise.reject(refreshError);
       }
     }
@@ -79,5 +48,26 @@ api.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+const refreshToken = async () => {
+  try {
+    const response = await axios.post(
+      `${baseURL}/users/auth/refresh`,
+      {},
+      {
+        withCredentials: true,
+      }
+    );
+
+    if (response.data.success && response.data.tokens?.accessToken) {
+      setStorage("accessToken", response.data.tokens.accessToken);
+      return response.data.tokens.accessToken;
+    }
+    return null;
+  } catch (e) {
+      console.error("Failed to refresh token: ", e);
+    return null;
+  }
+};
 
 export default api;

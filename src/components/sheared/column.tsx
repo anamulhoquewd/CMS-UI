@@ -17,12 +17,18 @@ import {
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Label } from "@/components/ui/label";
 
 // Define Props Interface
 interface ColumnsProps {
   setIsAddOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setIsEditing: React.Dispatch<React.SetStateAction<boolean>>;
-  setId: React.Dispatch<React.SetStateAction< string | null> >;
+  setId: React.Dispatch<React.SetStateAction<string | null>>;
   setIsDelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setValues: (values: any) => void;
 }
@@ -301,13 +307,18 @@ const customersColumns = ({
   return columns;
 };
 
+interface orderColumnsProps extends Partial<ColumnsProps> {
+  hasAction?: boolean;
+}
+
 const orderColumns = ({
   setIsAddOpen,
   setIsEditing,
   setIsDelOpen,
   setValues,
   setId,
-}: ColumnsProps): ColumnDef<any>[] => {
+  hasAction = true,
+}: orderColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "_id",
@@ -359,7 +370,10 @@ const orderColumns = ({
       header: "Total",
       cell: ({ row }) => <div>{row.getValue("total")}</div>,
     },
-    {
+  ];
+
+  if (hasAction) {
+    columns.push({
       accessorKey: "actions",
       header: "Actions",
       cell: ({ row }) => (
@@ -375,7 +389,7 @@ const orderColumns = ({
             <DropdownMenuItem
               onClick={() => {
                 setValues!(row.original);
-                setId(row.getValue("_id"));
+                setId!(row.getValue("_id"));
                 setIsAddOpen!(true);
                 setIsEditing!(true);
               }}
@@ -389,8 +403,8 @@ const orderColumns = ({
             <DropdownMenuItem
               variant="destructive"
               onClick={() => {
-                setId(row.getValue("_id"));
-                setIsDelOpen(true);
+                setId!(row.getValue("_id"));
+                setIsDelOpen!(true);
               }}
               className="cursor-pointer"
             >
@@ -400,11 +414,15 @@ const orderColumns = ({
           </DropdownMenuContent>
         </DropdownMenu>
       ),
-    },
-  ];
+    });
+  }
 
   return columns;
 };
+
+interface paymentColumnsProps extends Partial<ColumnsProps> {
+  hasAction?: boolean;
+}
 
 const paymentColumns = ({
   setIsAddOpen,
@@ -412,45 +430,94 @@ const paymentColumns = ({
   setValues,
   setId,
   setIsDelOpen,
-}: ColumnsProps): ColumnDef<any>[] => {
+  hasAction = true,
+}: paymentColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "_id",
       header: "ID",
+      cell: ({ row }) => <div>{row.getValue("_id")}</div>,
     },
     {
-      accessorKey: "customer",
+      accessorKey: "customerId",
       header: "Customer ID",
+      cell: ({ row }) => <div>{row.getValue("customerId")}</div>,
     },
     {
       accessorKey: "name",
       header: "Name",
+      cell: ({ row }) => <div>{row.getValue("name")}</div>,
     },
     {
-      accessorKey: "phone",
-      header: "Phone",
+      accessorKey: "transactionDetails",
+      header: "Transactions",
+      cell: ({ row }) => {
+        const transactionDetails = row.getValue("transactionDetails") as {
+          paymentMethod: string;
+        };
+        return (
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline">View Details</Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <h4 className="font-medium leading-none">
+                    {transactionDetails.paymentMethod.toUpperCase()} Transaction
+                    Details
+                  </h4>
+                  <p className="text-sm text-muted-foreground">
+                    Short Descriptions.
+                  </p>
+                </div>
+                <div className="grid gap-2">
+                  <div className="grid grid-cols-2 items-center gap-4">
+                    <Label>Amount</Label>
+                    <span className="font-medium">
+                      {Number.parseFloat(row.getValue("amount")).toFixed(2)}
+                    </span>
+                  </div>
+
+                  {Object.entries(transactionDetails).map(([key, value]) => (
+                    <div
+                      key={key}
+                      className="grid grid-cols-2 items-center gap-4"
+                    >
+                      <Label className="capitalize">
+                        {key.replace(/([A-Z])/g, " $1").trim()}
+                      </Label>
+                      <span className="font-medium text-wrap">
+                        {String(value)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        );
+      },
     },
     {
-      accessorKey: "secondaryPhone",
-      header: "Secondary Phone",
+      accessorKey: "amount",
+      header: "Amount",
+      cell: ({ row }) => <div>{row.getValue("amount")}</div>,
     },
     {
-      accessorKey: "address",
-      header: "Address",
+      accessorKey: "note",
+      header: "Note",
+      cell: ({ row }) => <div>{row.getValue("note")}</div>,
     },
     {
-      accessorKey: "quantity",
-      header: "Quantity",
-    },
-    {
-      accessorKey: "price",
-      header: "Price",
-    },
-    {
-      accessorKey: "date",
+      accessorKey: "createdAt",
       header: "Date",
+      cell: ({ row }) => <div>{row.getValue("createdAt")}</div>,
     },
-    {
+  ];
+
+  if (hasAction) {
+    columns.push({
       accessorKey: "actions",
       header: "Actions",
       cell: ({ row }) => (
@@ -466,7 +533,7 @@ const paymentColumns = ({
             <DropdownMenuItem
               onClick={() => {
                 setValues!(row.original);
-                setId(row.getValue("_id"));
+                setId!(row.getValue("_id"));
                 setIsAddOpen!(true);
                 setIsEditing!(true);
               }}
@@ -479,8 +546,8 @@ const paymentColumns = ({
 
             <DropdownMenuItem
               onClick={() => {
-                setId(row.getValue("_id"));
-                setIsDelOpen(true);
+                setId!(row.getValue("_id"));
+                setIsDelOpen!(true);
               }}
             >
               <Trash2 className="mr-2 h-4 w-4" /> Delete
@@ -488,8 +555,8 @@ const paymentColumns = ({
           </DropdownMenuContent>
         </DropdownMenu>
       ),
-    },
-  ];
+    });
+  }
 
   return columns;
 };

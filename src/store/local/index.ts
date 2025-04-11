@@ -1,9 +1,22 @@
 // Set to local storage
-export const setStorage = (key: string, value: string) =>
-  localStorage.setItem(key, value);
+export const setStorage = (key: string, value: string) => {
+  if (typeof window !== "undefined") {
+    return localStorage.setItem(key, value);
+  }
+  return null;
+};
 
 // Get from local storage
-export const getStorage = (key: string) => localStorage.getItem(key);
+export const getStorage = (key: string) => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem(key);
+  }
+  return null;
+};
 
 // Remove from local storage
-export const removeStorage = (key: string) => localStorage.removeItem(key);
+export const removeStorage = (key: string) => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(key);
+  }
+};

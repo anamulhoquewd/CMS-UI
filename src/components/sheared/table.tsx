@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDownIcon,  } from "lucide-react";
+import { ChevronDownIcon } from "lucide-react";
 import {
   TableHead,
   TableHeader,
@@ -25,26 +25,39 @@ import { Badge } from "../ui/badge";
 import { ScrollArea, ScrollBar } from "../ui/scroll-area";
 import { RoleBadge } from "../dashboard/role-badge";
 import { format } from "date-fns";
+import { PaymentStatusBadge } from "../dashboard/payment-status-badge";
+import { PaymentSystemBadge } from "../dashboard/payment-system-badge";
 
 interface UsersTableProps {
   table: any;
   columns: any[];
-  setSearch: React.Dispatch<React.SetStateAction<string>>;
+  setSearch?: React.Dispatch<React.SetStateAction<string>>;
 }
 
-function UsersTable({ table, columns, setSearch,  }: UsersTableProps) {
+function UsersTable({ table, columns, setSearch }: UsersTableProps) {
   return (
     <>
       <div className="flex flex-row justify-between items-center py-4 gap-2">
-        <Input
-          placeholder="Search..."
-          onChange={(event) => {
-            setTimeout(() => {
-              setSearch(event.target.value);
-            }, 2000);
-          }}
-          className="max-w-sm"
-        />
+        {setSearch ? (
+          <Input
+            placeholder="Search..."
+            onChange={(event) => {
+              setTimeout(() => {
+                setSearch(event.target.value);
+              }, 2000);
+            }}
+            className="max-w-sm"
+          />
+        ) : (
+          <Input
+            placeholder="Search by Name"
+            value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+            onChange={(event) =>
+              table.getColumn("name")?.setFilterValue(event.target.value)
+            }
+            className="max-w-sm"
+          />
+        )}
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -146,6 +159,7 @@ function UsersTable({ table, columns, setSearch,  }: UsersTableProps) {
                           const cellValue =
                             (cell.column.id === "defaultPrice" ||
                               cell.column.id === "price" ||
+                              cell.column.id === "amount" ||
                               cell.column.id === "total") &&
                             cell.getValue() !== undefined ? (
                               // jodi price hoy tahole just .00 add korar jonno eti kora hoyeche.
@@ -181,7 +195,33 @@ function UsersTable({ table, columns, setSearch,  }: UsersTableProps) {
                                   Inactive
                                 </Badge>
                               )
-                            ) : cell.column.id === "date" &&
+                            ) : cell.column.id === "paymentSystem" &&
+                              cell.getValue() !== undefined ? (
+                              cell.getValue() ? (
+                                <PaymentSystemBadge system={cell.getValue()} />
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className={"border-red-500 text-red-500"}
+                                >
+                                  Inactive
+                                </Badge>
+                              )
+                            ) : cell.column.id === "paymentStatus" &&
+                              cell.getValue() !== undefined ? (
+                              cell.getValue() ? (
+                                <PaymentStatusBadge status={cell.getValue()} />
+                              ) : (
+                                <Badge
+                                  variant="outline"
+                                  className={"border-red-500 text-red-500"}
+                                >
+                                  Inactive
+                                </Badge>
+                              )
+                            ) : (cell.column.id === "date" ||
+                                cell.column.id === "createdAt" ||
+                                cell.column.id === "updatedAt") &&
                               cell.getValue() !== undefined ? (
                               format(new Date(cell.getValue()), "yyyy-MM-dd")
                             ) : cell.column.id === "defaultOffDays" &&

@@ -1,8 +1,15 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import DeleteAlert from "@/components/sheared/delete-alert";
-import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { StatsCard } from "@/components/dashboard/stats-card";
+import usePayment from "@/hooks/payment";
+import { paymentColumns } from "../sheared/column";
 import {
   ColumnFiltersState,
   getCoreRowModel,
@@ -12,11 +19,17 @@ import {
   useReactTable,
   VisibilityState,
 } from "@tanstack/react-table";
-import { orderColumns } from "@/components/sheared/column";
-import useOrder from "@/hooks/order";
-import OrderCarts from "./carts";
-import OrderCardHeader from "./card-header";
-import OrderCardContent from "./cardContent";
+import { useState } from "react";
+import UsersTable from "../sheared/table";
+import PaginationForTable from "../sheared/paginationToTable";
+import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area";
+import RegistrationForm from "./registerForm";
+import DeleteAlert from "../sheared/delete-alert";
+import PaymentCarts from "./carts";
+import PaymentCardHeader from "./card-header";
+import PaymentCardContent from "./card-content";
 
 function Index() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -28,40 +41,29 @@ function Index() {
   });
 
   const {
-    orders,
+    payments,
+    pagination,
+    setPagination,
     setIsAddOpen,
     setIsEditing,
     setIsDelOpen,
+    defaultValues: values,
     setDefaultValues: setValues,
-    setOrderId: setId,
+    setPaymentId: setId,
     isAddOpen,
     isEditing,
-    isDelOpen,
-    setSearch,
-    form,
-    defaultValues: values,
-    handleNextDay,
-    handlePrevDay,
-    setPagination,
-    pagination,
     isLoading,
-    createOrder: onSubmit,
-    updateOrder: onUpdate,
-    deleteOrder: onDelete,
+    isDelOpen,
+    form,
+    createPayment: onSubmit,
+    updatePayment: onUpdate,
+    deletePayment: onDelete,
     setSelectedCustomer,
-    selectedCustomer,
-    filteredCustomers,
-    setDateRange,
-    dateRange,
-    setSelectDate,
-    selectDate,
-    handleResetFilter,
-    ordersCount,
-    totalLunch,
-    totalDinner,
-  } = useOrder();
+    customerIds,
+    paymentsCount,
+  } = usePayment();
 
-  const columns = orderColumns({
+  const columns = paymentColumns({
     setIsAddOpen,
     setIsEditing,
     setIsDelOpen,
@@ -71,7 +73,7 @@ function Index() {
 
   const table = useReactTable({
     columns,
-    data: orders,
+    data: payments,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
@@ -96,45 +98,33 @@ function Index() {
 
   return (
     <>
-      <OrderCarts
-        ordersCount={ordersCount}
-        totalLunch={totalLunch}
-        totalDinner={totalDinner}
-      />
+      <PaymentCarts paymentsCount={paymentsCount} />
 
-      <Card className="w-full overflow-hidden">
-        <OrderCardHeader
-          onSubmit={onSubmit}
-          onUpdate={onUpdate}
+      <Card>
+        <PaymentCardHeader
           {...{
-            selectDate,
-            setSelectDate,
-            handlePrevDay,
-            handleNextDay,
-            setDateRange,
-            dateRange,
-            handleResetFilter,
-            form,
-            values,
+            isLoading,
             isAddOpen,
             setIsAddOpen,
-            setValues,
-            setId,
-            setIsEditing,
             isEditing,
-            filteredCustomers,
-            isLoading,
-            selectedCustomer,
+            setIsEditing,
+            values,
+            setValues,
+            form,
+            setId,
             setSelectedCustomer,
+            customerIds,
+            onSubmit,
+            onUpdate,
           }}
         />
-
-        <OrderCardContent
-          table={table}
-          columns={columns}
-          setSearch={setSearch}
-          pagination={pagination}
-          setPagination={setPagination}
+        <PaymentCardContent
+          {...{
+            table,
+            columns,
+            pagination,
+            setPagination,
+          }}
         />
       </Card>
       <DeleteAlert

@@ -6,6 +6,17 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuGroup,
@@ -23,11 +34,12 @@ import logoLight from "@/../public/logo-light.png";
 import { RoleBadge } from "@/components/dashboard/role-badge";
 import { useSidebar } from "@/components/ui/sidebar";
 import useGetMe from "@/hooks/auth/useGetMe";
+import useLogout from "@/hooks/auth/useLogout";
 
 export default function Header() {
   const { resolvedTheme } = useTheme();
   const { user } = useGetMe();
-
+  const { logout } = useLogout();
   const { isMobile, setOpenMobile } = useSidebar();
 
   return (
@@ -109,16 +121,46 @@ export default function Header() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem className="cursor-pointer">
-                  {/* <Link className="flex items-center gap-2" href="/settings"></Link> */}
-                  <Settings className="mr-2 h-4 w-4" />
-                  <span>Settings</span>
+                  <Link
+                    className="flex items-center gap-2"
+                    href="/dashboard/settings"
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
                 </DropdownMenuItem>
               </DropdownMenuGroup>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer">
-                <LogOut className="mr-2 h-4 w-4" />
-                <span>Log out</span>
-              </DropdownMenuItem>
+              <AlertDialog>
+                <AlertDialogTrigger
+                  className="p-0 border-none w-full cursor-pointer flex justify-start"
+                  asChild
+                >
+                  <Button variant="outline">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>
+                      Are you absolutely sure?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete
+                      your account and remove your data from our servers.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="cursor-pointer">Cancel</AlertDialogCancel>
+                    <AlertDialogAction className="cursor-pointer"
+                      onClick={logout}
+                    >
+                      Continue
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

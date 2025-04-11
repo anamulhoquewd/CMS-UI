@@ -139,7 +139,15 @@ const useUser = () => {
       console.log("Users created successfully");
 
       // Reset form
-      form.reset();
+      form.reset({
+        name: "",
+        email: "",
+        NID: "",
+        role: "manager",
+        phone: "",
+        address: "",
+        active: true,
+      });
 
       // Close modal
       setIsAddOpen(false);
@@ -231,7 +239,7 @@ const useUser = () => {
     }
   };
 
-  const deleteCustomer = async () => {
+  const deleteUsers = async () => {
     // Loading spinner start
     setIsLoading(true);
 
@@ -246,24 +254,24 @@ const useUser = () => {
         throw new Error(response.data.error.message);
       }
 
-      console.log("Customer deleted successfully");
+      console.log("Users deleted successfully");
 
       // Close delete modal
       setIsDelOpen(false);
 
-      // Update customer table
+      // Update Users table
       getUsers();
     } catch (error: any) {
       const res = handleAxiosError(error);
 
-      console.error("Error deleting customer:", res.message);
+      console.error("Error deleting Users:", res.message);
     } finally {
       // Loading spinner end
       setIsLoading(false);
     }
   };
 
-  const getSingleCustomer = async () => {};
+  const getSingleUsers = async () => {};
 
   useEffect(() => {
     getUsers(pagination.page, debouchedSearch, filterWithStatus);
@@ -286,8 +294,8 @@ const useUser = () => {
     setDefaultValues,
     defaultValues,
     setUserId,
-    getSingleCustomer,
-    deleteCustomer,
+    getSingleUsers,
+    deleteUsers,
     updateUsers,
     createUsers,
     pagination,

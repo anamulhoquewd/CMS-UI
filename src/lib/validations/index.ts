@@ -104,7 +104,19 @@ const orderRegistrationFormSchema = z.object({
   price: z.number().min(0),
   quantity: z.number().min(1),
   item: z.enum(["lunch", "dinner", "lunch&dinner", ""]),
-  date: z.date(),
+  date: z.date(z.string()),
+  note: z.string().optional(),
+});
+
+const paymentRegistrationFormSchema = z.object({
+  customerId: z.string().length(24, "Please Select a customer"),
+  amount: z.number().min(0),
+  paymentMethod: z.enum(["cash", "bank", "bkash", "nagad", ""]),
+  cashReceivedBy: z.string().optional(),
+  transactionId: z.string().optional(),
+  bkashNumber: z.string().optional(),
+  nagadNumber: z.string().optional(),
+  bankName: z.string().optional(),
   note: z.string().optional(),
 });
 
@@ -117,4 +129,5 @@ export {
   customerRegistrationFormSchema,
   userRegistrationFormSchema,
   orderRegistrationFormSchema,
+  paymentRegistrationFormSchema,
 };

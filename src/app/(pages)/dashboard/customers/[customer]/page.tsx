@@ -1,11 +1,15 @@
-import React from 'react'
+import Index from "@/components/customer";
+import { Metadata } from "next";
 
-function SingleCustomer() {
+export const metadata: Metadata = {
+  title: "Customers Management | Manage and analyze customers",
+  description: "Manage and analyze customers",
+};
+
+export default function SingleCustomer() {
   return (
-    <div>
-      This is single customer
+    <div className="flex flex-col gap-4">
+      <Index />
     </div>
-  )
+  );
 }
-
-export default SingleCustomer
