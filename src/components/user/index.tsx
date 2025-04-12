@@ -101,10 +101,10 @@ function Index() {
       },
     },
   });
+
   return (
     <>
-      {" "}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-2">
+      <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <StatsCard
           title="Total Users in System"
           value={String(usersCount.total)}
@@ -121,11 +121,11 @@ function Index() {
         />
       </div>
       <Card className="w-full overflow-hidden">
-        <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-3 space-y-0">
+        <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-2">
           <div className="space-y-2">
             <CardTitle>All Users</CardTitle>
             <CardDescription>
-              Manage and view all users (Admins and Managers)
+              Manage and view all users
             </CardDescription>
           </div>
           <UserFilter onFilterChange={setFilterWithStatus} />

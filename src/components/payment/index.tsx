@@ -2,12 +2,7 @@
 
 import {
   Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { StatsCard } from "@/components/dashboard/stats-card";
 import usePayment from "@/hooks/payment";
 import { paymentColumns } from "../sheared/column";
 import {
@@ -20,16 +15,10 @@ import {
   VisibilityState,
 } from "@tanstack/react-table";
 import { useState } from "react";
-import UsersTable from "../sheared/table";
-import PaginationForTable from "../sheared/paginationToTable";
-import { Button } from "../ui/button";
-import { Plus } from "lucide-react";
-import { ScrollArea, ScrollBar } from "../ui/scroll-area";
-import RegistrationForm from "./registerForm";
 import DeleteAlert from "../sheared/delete-alert";
-import PaymentCarts from "./carts";
 import PaymentCardHeader from "./card-header";
 import PaymentCardContent from "./card-content";
+import { StatsCard } from "../dashboard/stats-card";
 
 function Index() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -98,7 +87,34 @@ function Index() {
 
   return (
     <>
-      <PaymentCarts paymentsCount={paymentsCount} />
+      <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <StatsCard
+        title="Total Transactions"
+        value={String(paymentsCount.totalTransactions)}
+        description={`${paymentsCount.monthlyTransaction} from last month`}
+        icon="credit-card"
+      />
+      <StatsCard
+        title="This Month's Revenue"
+        value={String(paymentsCount.thisMonthAmounts)}
+        description={`${paymentsCount.yearlyTransaction} from last year`}
+        icon="credit-card"
+      />
+      <StatsCard
+        title="This Year's Revenue"
+        value={String(paymentsCount.thisYearAmounts)}
+        description="This Year's Revenue"
+        icon="credit-card"
+        plaintext={true}
+      />
+      <StatsCard
+        title="Total Revenue"
+        value={String(paymentsCount.totalAmounts)}
+        description="Total Revenue"
+        icon="credit-card"
+        plaintext={true}
+      />
+    </div>
 
       <Card>
         <PaymentCardHeader

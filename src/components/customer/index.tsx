@@ -29,6 +29,10 @@ import { handleAxiosError } from "@/utils/error";
 import api from "@/protectedApi/Interceptor";
 import { getStorage } from "@/store/local";
 import PaymentCardContent from "../payment/card-content";
+import { decodeJwtPayload } from "@/utils/helper";
+
+const token = getStorage("accessToken");
+const { role } = decodeJwtPayload(token as string);
 
 export default function CustomerProfile() {
   const customerId = useParams().customer as string;
@@ -82,18 +86,13 @@ export default function CustomerProfile() {
           sortBy: "date",
           sortType: "asc",
         },
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
       });
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
       }
 
-      console.log(
-        "Customer fetched successfully, the customer is: " + customerId
-      );
+      console.log("Customer fetched successfully");
 
       const data = response.data.data;
       setSelf(data.customer);
@@ -125,9 +124,6 @@ export default function CustomerProfile() {
         params: {
           ...(id && { customerId: id }),
         },
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
       });
 
       if (!response.data.success) {
@@ -151,7 +147,7 @@ export default function CustomerProfile() {
     getOrderCount(customerId);
   }, [orderPagination.page, paymentPagination.page, customerId]);
 
-  const columnsForOrder = orderColumns({ hasAction: false });
+  const columnsForOrder = orderColumns({ hasAction: false, role });
 
   const columnsForPayment = paymentColumns({ hasAction: false });
 
@@ -202,9 +198,9 @@ export default function CustomerProfile() {
   return (
     <div className="w-full mx-auto space-y-6 mb-4">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-lg shadow-sm">
+      <div className="flex flex-col sm:flex-row md:items-center justify-between gap-4 p-6 rounded-lg shadow-sm">
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center w-14 h-14 rounded-full bg-primary/5">
+          <div className="hidden sm:flex items-center justify-center w-14 h-14 rounded-full bg-primary/5">
             <span className="text-primary text-2xl font-bold">
               {self.name[0]}
             </span>
@@ -228,7 +224,7 @@ export default function CustomerProfile() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3">
         <StatsCard
           description="Last order placed on June 12, 2023"
           icon="shopping-cart"
@@ -274,7 +270,6 @@ export default function CustomerProfile() {
               >
                 <User className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Self Info</span>
-                <span className="sm:hidden">Info</span>
               </TabsTrigger>
               <TabsTrigger
                 value="orders"
@@ -282,7 +277,6 @@ export default function CustomerProfile() {
               >
                 <Package className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Total Orders</span>
-                <span className="sm:hidden">Orders</span>
               </TabsTrigger>
               <TabsTrigger
                 value="payments"
@@ -290,10 +284,10 @@ export default function CustomerProfile() {
               >
                 <CreditCard className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Total Payments</span>
-                <span className="sm:hidden">Payments</span>
               </TabsTrigger>
             </TabsList>
           </CardHeader>
+
           <CardContent className="pt-6">
             <TabsContent value="info">
               <CustomerInfo customer={self} />

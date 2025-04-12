@@ -1,6 +1,5 @@
 import { changePasswordFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
-import { getStorage } from "@/store/local";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -25,11 +24,7 @@ const useChangePass = (onClose: () => void) => {
     setIsLoading(true);
 
     try {
-      const response = await api.patch("/users/auth/change-password", data, {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.patch("/users/auth/change-password", data, );
 
       if (response.data.success) {
         form.reset();

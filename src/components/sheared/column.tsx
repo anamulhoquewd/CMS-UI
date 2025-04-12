@@ -168,13 +168,18 @@ const userColumns = ({
   return columns;
 };
 
+// Props Interface
+interface CustomersColumnsProps extends ColumnsProps {
+  role: string;
+}
 const customersColumns = ({
   setIsAddOpen,
   setIsEditing,
   setIsDelOpen,
   setValues,
   setId,
-}: ColumnsProps): ColumnDef<any>[] => {
+  role,
+}: CustomersColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
       accessorKey: "_id",
@@ -286,18 +291,22 @@ const customersColumns = ({
               Edit Customer
             </DropdownMenuItem>
 
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => {
-                setId(row.getValue("_id"));
-                setIsDelOpen(true);
-              }}
-              className="cursor-pointer"
-            >
-              <Trash2 />
-              Delete Customer
-            </DropdownMenuItem>
+            {(role === "super_admin" || role === "admin") && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => {
+                    setId(row.getValue("_id"));
+                    setIsDelOpen(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Trash2 />
+                  Delete Customer
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),
@@ -309,8 +318,8 @@ const customersColumns = ({
 
 interface orderColumnsProps extends Partial<ColumnsProps> {
   hasAction?: boolean;
+  role: string;
 }
-
 const orderColumns = ({
   setIsAddOpen,
   setIsEditing,
@@ -318,6 +327,7 @@ const orderColumns = ({
   setValues,
   setId,
   hasAction = true,
+  role,
 }: orderColumnsProps): ColumnDef<any>[] => {
   const columns: ColumnDef<any>[] = [
     {
@@ -398,19 +408,22 @@ const orderColumns = ({
               Edit
             </DropdownMenuItem>
 
-            <DropdownMenuSeparator />
-
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => {
-                setId!(row.getValue("_id"));
-                setIsDelOpen!(true);
-              }}
-              className="cursor-pointer"
-            >
-              <Trash2 />
-              Delete Customer
-            </DropdownMenuItem>
+            {(role === "super_admin" || role === "admin") && (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => {
+                    setId!(row.getValue("_id"));
+                    setIsDelOpen!(true);
+                  }}
+                  className="cursor-pointer"
+                >
+                  <Trash2 />
+                  Delete Customer
+                </DropdownMenuItem>
+              </>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       ),

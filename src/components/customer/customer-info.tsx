@@ -1,5 +1,13 @@
 import { CustomerSchema } from "@/interface";
-import { Calendar, Clock, Copy, KeyRound, MapPin, Phone } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Copy,
+  KeyRound,
+  MapPin,
+  Phone,
+  RefreshCcw,
+} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +28,7 @@ import {
 } from "../ui/tooltip";
 import { PaymentStatusBadge } from "../dashboard/payment-status-badge";
 import { PaymentSystemBadge } from "../dashboard/payment-system-badge";
+import api from "@/protectedApi/Interceptor";
 
 export default function CustomerInfo({
   customer,
@@ -29,6 +38,27 @@ export default function CustomerInfo({
   // Function to copy the access key to clipboard
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+  };
+
+  const accessKeyIsExpired = new Date(customer.accessKeyExpiredAt) < new Date();
+
+  const handleRegenerateKey = async () => {
+    try {
+      const response = await api.post(
+        `customers/regenerate-access-key?id=${customer._id}`
+      );
+
+      if (!response.data.success) {
+        throw new Error(response.data.error.message);
+      }
+
+      console.log("Access key regenerated successfully");
+    } catch (error) {
+      console.log(
+        "Error regenerating access key. The customer is: " + customer._id
+      );
+      console.error(error);
+    }
   };
 
   return (
@@ -42,14 +72,15 @@ export default function CustomerInfo({
             </h3>
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary/5">
+                <div className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-primary/5">
                   <span className="text-primary font-semibold text-lg">
                     {customer.name[0]}
                   </span>
                 </div>
+
                 <div>
                   <p className="font-medium">{customer.name}</p>
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     <p className="text-sm text-muted-foreground">
                       Customer ID:
                     </p>
@@ -82,7 +113,7 @@ export default function CustomerInfo({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-sm pt-2">
                 <Phone className="h-4 w-4 text-muted-foreground" />
                 <span>{customer.phone}</span>
               </div>
@@ -112,29 +143,33 @@ export default function CustomerInfo({
               <div className="flex items-center gap-2 text-sm">
                 <KeyRound className="h-4 w-4 text-muted-foreground" />
                 <div className="flex items-center gap-2 flex-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <p className="">Access Key</p>
-                    <code className="px-2 py-1 bg-muted rounded text-xs font-mono truncate max-w-[180px]">
-                      {customer.accessKey.substring(0, 16)}...
-                    </code>
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 cursor-pointer"
-                            onClick={() => copyToClipboard(customer.accessKey)}
-                          >
-                            <Copy className="h-3 w-3" />
-                            <span className="sr-only">Copy access key</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Copy access key</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    <span className="flex items-center">
+                      <code className="px-2 py-1 bg-muted rounded text-xs font-mono truncate max-w-[180px]">
+                        {customer.accessKey.substring(0, 12)}...
+                      </code>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 cursor-pointer"
+                              onClick={() =>
+                                copyToClipboard(customer.accessKey)
+                              }
+                            >
+                              <Copy className="h-3 w-3" />
+                              <span className="sr-only">Copy access key</span>
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Copy access key</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </span>
                   </div>
                 </div>
               </div>
@@ -146,6 +181,28 @@ export default function CustomerInfo({
                   <span className="font-medium ml-2">
                     {format(new Date(customer.accessKeyExpiredAt), "PPP p")}
                   </span>
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm">
+                <RefreshCcw className="h-4 w-4 text-muted-foreground" />
+                <span>
+                  Re-Generate Key:
+                  <Button
+                    variant={"outline"}
+                    size={"sm"}
+                    className="ml-2 cursor-pointer"
+                    disabled={!accessKeyIsExpired}
+                    onClick={() => {
+                      if (accessKeyIsExpired) {
+                        handleRegenerateKey();
+                      } else {
+                        console.log("Access key is not expired");
+                      }
+                    }}
+                  >
+                    Generate
+                  </Button>
                 </span>
               </div>
             </div>
@@ -176,13 +233,19 @@ export default function CustomerInfo({
                 </p>
               </div>
               <div className="space-y-1">
-                <p className="text-sm text-muted-foreground">
+                <p className="hidden sm:block text-sm text-muted-foreground">
                   Default Off Days
+                </p>
+                <p className="sm:hidden text-sm text-muted-foreground">
+                  Off Days
                 </p>
                 <p className="font-medium">
                   <DropdownMenu>
                     <DropdownMenuTrigger>
-                      <Button className="cursor-pointer" variant={"outline"}>
+                      <Button className="cursor-pointer sm:hidden" variant={"outline"}>
+                        Off Days
+                      </Button>
+                      <Button className="cursor-pointer hidden sm:block" variant={"outline"}>
                         Default off Days
                       </Button>
                     </DropdownMenuTrigger>

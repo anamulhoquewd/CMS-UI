@@ -1,7 +1,6 @@
 import { Pagination } from "@/interface";
 import { userRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
-import { getStorage } from "@/store/local";
 import { defaultPagination } from "@/utils/default";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,9 +54,6 @@ const useUser = () => {
           page,
           active,
         },
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
       });
 
       if (!response.data.success) {
@@ -86,11 +82,7 @@ const useUser = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.get("/users/count", {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.get("/users/count");
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -122,15 +114,7 @@ const useUser = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post(
-        "/users/auth/register",
-        form.getValues(),
-        {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        }
-      );
+      const response = await api.post("/users/auth/register", form.getValues());
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -185,11 +169,7 @@ const useUser = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.put(`/users/${userId}`, form.getValues(), {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.put(`/users/${userId}`, form.getValues());
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -244,11 +224,7 @@ const useUser = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.delete(`/users/${userId}`, {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.delete(`/users/${userId}`);
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);

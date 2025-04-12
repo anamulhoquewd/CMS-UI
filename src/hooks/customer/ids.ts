@@ -1,6 +1,5 @@
 import { CustomerSchema } from "@/interface";
 import api from "@/protectedApi/Interceptor";
-import { getStorage } from "@/store/local";
 import { handleAxiosError } from "@/utils/error";
 import { useEffect, useState } from "react";
 
@@ -9,11 +8,7 @@ const useCustomerIds = () => {
 
   const getIds = async () => {
     try {
-      const response = await api.get("/customers/ids", {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.get("/customers/ids",);
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);

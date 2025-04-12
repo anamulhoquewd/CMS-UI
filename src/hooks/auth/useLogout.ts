@@ -1,15 +1,11 @@
 import api from "@/protectedApi/Interceptor";
-import { getStorage, removeStorage } from "@/store/local";
+import { removeStorage } from "@/store/local";
 import { useCallback } from "react";
 
 function useLogout() {
   const logout = useCallback(async () => {
     try {
-      const response = await api.post("/users/auth/logout", null, {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.post("/users/auth/logout", null);
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);

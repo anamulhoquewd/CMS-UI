@@ -25,7 +25,7 @@ function Index() {
   return (
     <>
       {/* Stats cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <StatsCard
           title="Today's Orders"
           value={String(ordersCount.todayOrders)}

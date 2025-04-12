@@ -70,7 +70,7 @@ function OrderCardHeader({
   setSelectedCustomer,
 }: Props) {
   return (
-    <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-3 space-y-0">
+    <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:flex-wrap space-y-0">
       <div className="space-y-2">
         <CardTitle>All Orders</CardTitle>
         <CardDescription>Manage and view all orders</CardDescription>
@@ -86,9 +86,9 @@ function OrderCardHeader({
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-40 sm:w-[250px] cursor-pointer"
+              className="w-[175px] sm:w-[250px] cursor-pointer"
             >
-              <CalendarIcon className="mr-2 h-4 w-4 hidden sm:block" />
+              <CalendarIcon className="mr-2 h-2 w-2 hidden sm:block" />
               {selectDate ? (
                 format(selectDate, "PPP")
               ) : (
@@ -110,9 +110,9 @@ function OrderCardHeader({
         </Button>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4">
         {/* filter with date range */}
-        <div className="flex items-center justify-between w-fit gap-2">
+        <div className="flex items-center justify-between w-fit gap-8 sm:gap-2">
           <Popover>
             <PopoverTrigger asChild>
               <Button

@@ -1,7 +1,6 @@
 import { CustomerSchema, Pagination ,PaymentSchema} from "@/interface";
 import { paymentRegistrationFormSchema } from "@/lib/validations";
 import api from "@/protectedApi/Interceptor";
-import { getStorage } from "@/store/local";
 import { defaultPagination } from "@/utils/default";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -42,9 +41,7 @@ const usePayment = () => {
         params: {
           page,
         },
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
+       
       });
 
       if (!response.data.success) {
@@ -72,11 +69,7 @@ const usePayment = () => {
 
   const getPaymentsCount = async () => {
     try {
-      const response = await api.get("/payments/count", {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.get("/payments/count",);
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -131,11 +124,7 @@ const usePayment = () => {
             cashReceivedBy: form.getValues().cashReceivedBy,
           }),
         },
-        {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        }
+       
       );
 
       if (!response.data.success) {

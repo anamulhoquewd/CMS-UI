@@ -4,6 +4,8 @@ interface NavItem {
   icon: React.ComponentType;
 }
 
+import { getStorage } from "@/store/local";
+import { decodeJwtPayload } from "@/utils/helper";
 import {
   BarChart3,
   Users,
@@ -12,17 +14,15 @@ import {
   Settings,
   Home,
 } from "lucide-react";
-export const navItems: NavItem[] = [
+
+const token = getStorage("accessToken");
+const { role } = decodeJwtPayload(token as string);
+
+const navItems: NavItem[] = [
   {
     title: "Overview",
     href: "/dashboard",
     icon: Home,
-  },
-
-  {
-    title: "Users",
-    href: "/dashboard/users",
-    icon: Users,
   },
   {
     title: "Customers",
@@ -50,3 +50,12 @@ export const navItems: NavItem[] = [
     icon: Settings,
   },
 ];
+
+if (role === "super_admin")
+  navItems.splice(1, 0, {
+    title: "Users",
+    href: "/dashboard/users",
+    icon: Users,
+  });
+
+export { navItems };

@@ -14,9 +14,14 @@ import {
 } from "@tanstack/react-table";
 import { orderColumns } from "@/components/sheared/column";
 import useOrder from "@/hooks/order";
-import OrderCarts from "./carts";
 import OrderCardHeader from "./card-header";
 import OrderCardContent from "./cardContent";
+import { getStorage } from "@/store/local";
+import { decodeJwtPayload } from "@/utils/helper";
+import { StatsCard } from "../dashboard/stats-card";
+
+const token = getStorage("accessToken");
+const { role } = decodeJwtPayload(token as string);
 
 function Index() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -67,6 +72,7 @@ function Index() {
     setIsDelOpen,
     setValues,
     setId,
+    role,
   });
 
   const table = useReactTable({
@@ -96,11 +102,34 @@ function Index() {
 
   return (
     <>
-      <OrderCarts
-        ordersCount={ordersCount}
-        totalLunch={totalLunch}
-        totalDinner={totalDinner}
+      <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <StatsCard
+        title="Today's Orders"
+        value={String(ordersCount.todayOrders)}
+        description={`${ordersCount.dailyChange} from yesterday`}
+        icon="shopping-cart"
       />
+      <StatsCard
+        title="Today's Quantity"
+        value={String(totalLunch + totalDinner)}
+        description={`Lunches: ${totalLunch}, Dinners: ${totalDinner} | Only on this page`}
+        icon="shopping-cart"
+        plaintext={true}
+        className="text-green-500"
+      />
+      <StatsCard
+        title="Current Month Orders"
+        value={String(ordersCount.currentMonthOrders)}
+        description={`${ordersCount.monthlyChange} from last month`}
+        icon="shopping-cart"
+      />
+      <StatsCard
+        title="Total Orders"
+        value={String(ordersCount.totalOrders)}
+        description={`${ordersCount.yearlyChange} from last year`}
+        icon="credit-card"
+      />
+    </div>
 
       <Card className="w-full overflow-hidden">
         <OrderCardHeader

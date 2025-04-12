@@ -1,6 +1,5 @@
 import { UserSchema } from "@/interface";
 import api from "@/protectedApi/Interceptor";
-import { getStorage } from "@/store/local";
 import { useEffect, useState } from "react";
 
 const useAvatar = () => {
@@ -15,11 +14,7 @@ const useAvatar = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await api.get("/auth/me", {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        });
+        const response = await api.get("/auth/me", );
 
         if (response.data.success) {
           setUser(response.data.data);
@@ -60,7 +55,7 @@ const useAvatar = () => {
         {
           headers: {
             "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${getStorage("accessToken")}`,
+           
           },
         }
       );

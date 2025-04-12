@@ -1,7 +1,6 @@
 import { UserSchema } from "@/interface";
 import { updateUserBySelfSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
-import { getStorage } from "@/store/local";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -39,11 +38,7 @@ const useUpdate = ({ user }: { user: UserSchema | null }) => {
   const onSubmit = async (data: z.infer<typeof updateUserBySelfSchema>) => {
     setIsLoading(true);
     try {
-      const response = await api.patch("/users/profile", data, {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.patch("/users/profile", data);
 
       if (response.data.success) {
         console.log("Profile updated successfully");

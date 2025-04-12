@@ -36,6 +36,11 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import DeleteAlert from "@/components/sheared/delete-alert";
 import PaginationForTable from "@/components/sheared/paginationToTable";
 import UserFilter from "@/components/user/users-filter";
+import { getStorage } from "@/store/local";
+import { decodeJwtPayload } from "@/utils/helper";
+
+const token = getStorage("accessToken");
+const { role } = decodeJwtPayload(token as string);
 
 function Index() {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -76,6 +81,7 @@ function Index() {
     setIsDelOpen,
     setValues,
     setId: setCustomerId,
+    role,
   });
 
   const table = useReactTable({
@@ -104,7 +110,7 @@ function Index() {
   });
   return (
     <>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="gap-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <StatsCard
           title="Total Customers in System"
           value={String(customersCount.total)}
@@ -126,7 +132,7 @@ function Index() {
       </div>
 
       <Card className="w-full overflow-hidden">
-        <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-3 space-y-0">
+        <CardHeader className="flex flex-col sm:flex-row items-start justify-between gap-2 space-y-0">
           <div className="space-y-2">
             <CardTitle>All Customers</CardTitle>
             <CardDescription>Manage and view all customers</CardDescription>

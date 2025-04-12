@@ -1,7 +1,6 @@
 import { CustomerSchema, Pagination } from "@/interface";
 import { customerRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
-import { getStorage } from "@/store/local";
 import { logToShort } from "@/utils/date-converter";
 import { defaultPagination } from "@/utils/default";
 import { handleAxiosError } from "@/utils/error";
@@ -57,9 +56,6 @@ const useCustomer = () => {
           page,
           active,
         },
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
       });
 
       if (!response.data.success) {
@@ -88,11 +84,7 @@ const useCustomer = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.get("/customers/count", {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.get("/customers/count");
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -112,11 +104,7 @@ const useCustomer = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.get(`/customers/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.get(`/customers/${id}`);
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -154,18 +142,10 @@ const useCustomer = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post(
-        "/customers/auth/register",
-        {
-          ...form.getValues(),
-          defaultOffDays: logToShort(form.getValues().defaultOffDays || []),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        }
-      );
+      const response = await api.post("/customers/auth/register", {
+        ...form.getValues(),
+        defaultOffDays: logToShort(form.getValues().defaultOffDays || []),
+      });
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -222,18 +202,10 @@ const useCustomer = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.put(
-        `/customers/${customerId}`,
-        {
-          ...form.getValues(),
-          defaultOffDays: logToShort(form.getValues().defaultOffDays || []),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        }
-      );
+      const response = await api.put(`/customers/${customerId}`, {
+        ...form.getValues(),
+        defaultOffDays: logToShort(form.getValues().defaultOffDays || []),
+      });
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -285,11 +257,7 @@ const useCustomer = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.delete(`/customers/${customerId}`, {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.delete(`/customers/${customerId}`);
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);

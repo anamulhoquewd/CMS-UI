@@ -20,7 +20,7 @@ export function AppSidebar({ className }: { className?: string }) {
 
   return (
     <Sidebar collapsible="icon" className={className}>
-      <SidebarContent className="md:mt-16">
+      <SidebarContent className="sm:mt-16">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>

@@ -1,7 +1,6 @@
 import { CustomerSchema, OrderSchema, Pagination } from "@/interface";
 import { orderRegistrationFormSchema } from "@/lib/validations/";
 import api from "@/protectedApi/Interceptor";
-import { getStorage } from "@/store/local";
 import { handleAxiosError } from "@/utils/error";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -83,9 +82,6 @@ const useOrder = () => {
           sortBy: "date",
           sortType: "asc",
         },
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
       });
 
       if (!response.data.success) {
@@ -112,11 +108,7 @@ const useOrder = () => {
 
   const getOrdersCount = async () => {
     try {
-      const response = await api.get("/orders/count", {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.get("/orders/count");
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -156,25 +148,17 @@ const useOrder = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.post(
-        "/orders",
-        {
-          customerId: form.getValues().customerId,
-          date: format(selectDate, "yyyy-MM-dd"),
+      const response = await api.post("/orders", {
+        customerId: form.getValues().customerId,
+        date: format(selectDate, "yyyy-MM-dd"),
 
-          ...(form.getValues().item && { item: form.getValues().item }),
-          ...(form.getValues().price && { price: form.getValues().price }),
-          ...(form.getValues().quantity && {
-            quantity: form.getValues().quantity,
-          }),
-          ...(form.getValues().note && { note: form.getValues().note }),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${getStorage("accessToken")}`,
-          },
-        }
-      );
+        ...(form.getValues().item && { item: form.getValues().item }),
+        ...(form.getValues().price && { price: form.getValues().price }),
+        ...(form.getValues().quantity && {
+          quantity: form.getValues().quantity,
+        }),
+        ...(form.getValues().note && { note: form.getValues().note }),
+      });
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -227,11 +211,7 @@ const useOrder = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.put(`/orders/${orderId}`, form.getValues(), {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.put(`/orders/${orderId}`, form.getValues());
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);
@@ -291,11 +271,7 @@ const useOrder = () => {
     setIsLoading(true);
 
     try {
-      const response = await api.delete(`/orders/${orderId}`, {
-        headers: {
-          Authorization: `Bearer ${getStorage("accessToken")}`,
-        },
-      });
+      const response = await api.delete(`/orders/${orderId}`);
 
       if (!response.data.success) {
         throw new Error(response.data.error.message);

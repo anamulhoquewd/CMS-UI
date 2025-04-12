@@ -11,7 +11,7 @@ export default function PagesLayout({
     <>
       <SidebarProvider className="flex" defaultOpen={false}>
         <Header />
-        <AppSidebar className="hidden md:block" />
+        <AppSidebar />
         <main className="flex-1 mx-4 mt-20 w-0">{children}</main>
       </SidebarProvider>
     </>

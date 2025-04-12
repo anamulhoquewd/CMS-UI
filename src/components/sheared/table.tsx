@@ -37,7 +37,7 @@ interface UsersTableProps {
 function UsersTable({ table, columns, setSearch }: UsersTableProps) {
   return (
     <>
-      <div className="flex flex-row justify-between items-center py-4 gap-2">
+      <div className="flex flex-col sm:flex-row sm:justify-between py-4 gap-2">
         {setSearch ? (
           <Input
             placeholder="Search..."
@@ -46,7 +46,7 @@ function UsersTable({ table, columns, setSearch }: UsersTableProps) {
                 setSearch(event.target.value);
               }, 2000);
             }}
-            className="max-w-sm"
+            className="w-full sm:max-w-sm"
           />
         ) : (
           <Input
