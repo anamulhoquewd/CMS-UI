@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 const token = getStorage("accessToken");
-const { role } = decodeJwtPayload(token as string);
+const decode = decodeJwtPayload(token as string);
 
 const navItems: NavItem[] = [
   {
@@ -51,7 +51,7 @@ const navItems: NavItem[] = [
   },
 ];
 
-if (role === "super_admin")
+if (decode?.role === "super_admin")
   navItems.splice(1, 0, {
     title: "Users",
     href: "/dashboard/users",
