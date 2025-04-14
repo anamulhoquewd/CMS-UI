@@ -216,10 +216,13 @@ export default function CustomerProfile() {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-2 mt-4 md:mt-0">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <Phone className="h-4 w-4" />
-            <span>{self.phone}</span>
-          </div>
+          <a
+            href={`tel:${self.phone}`}
+            className="flex items-center gap-2 text-sm text-gray-500"
+          >
+            <Phone className="w-4 h-4" />
+            {self.phone}
+          </a>
         </div>
       </div>
 

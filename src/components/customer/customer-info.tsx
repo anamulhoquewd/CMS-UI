@@ -29,18 +29,26 @@ import {
 import { PaymentStatusBadge } from "../dashboard/payment-status-badge";
 import { PaymentSystemBadge } from "../dashboard/payment-system-badge";
 import api from "@/protectedApi/Interceptor";
+import { useEffect, useState } from "react";
 
 export default function CustomerInfo({
   customer,
 }: {
   customer: CustomerSchema;
 }) {
+  const [isExpired, setIsExpired] = useState(
+    new Date(customer.accessKeyExpiredAt) < new Date()
+  );
+
+  useEffect(() => {
+    const expired = new Date(customer.accessKeyExpiredAt) < new Date();
+    setIsExpired(expired);
+  }, [customer.accessKeyExpiredAt]);
+
   // Function to copy the access key to clipboard
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
   };
-
-  const accessKeyIsExpired = new Date(customer.accessKeyExpiredAt) < new Date();
 
   const handleRegenerateKey = async () => {
     try {
@@ -51,7 +59,7 @@ export default function CustomerInfo({
       if (!response.data.success) {
         throw new Error(response.data.error.message);
       }
-
+      setIsExpired(false);
       console.log("Access key regenerated successfully");
     } catch (error) {
       console.log(
@@ -192,9 +200,9 @@ export default function CustomerInfo({
                     variant={"outline"}
                     size={"sm"}
                     className="ml-2 cursor-pointer"
-                    disabled={!accessKeyIsExpired}
+                    disabled={!isExpired}
                     onClick={() => {
-                      if (accessKeyIsExpired) {
+                      if (isExpired) {
                         handleRegenerateKey();
                       } else {
                         console.log("Access key is not expired");
@@ -242,10 +250,16 @@ export default function CustomerInfo({
                 <p className="font-medium">
                   <DropdownMenu>
                     <DropdownMenuTrigger>
-                      <Button className="cursor-pointer sm:hidden" variant={"outline"}>
+                      <Button
+                        className="cursor-pointer sm:hidden"
+                        variant={"outline"}
+                      >
                         Off Days
                       </Button>
-                      <Button className="cursor-pointer hidden sm:block" variant={"outline"}>
+                      <Button
+                        className="cursor-pointer hidden sm:block"
+                        variant={"outline"}
+                      >
                         Default off Days
                       </Button>
                     </DropdownMenuTrigger>

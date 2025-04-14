@@ -1,10 +1,6 @@
 import type { Metadata } from "next"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { RevenueChart } from "@/components/dashboard/revenue-chart"
-import { Overview } from "@/components/dashboard/overview"
-import { UserDistributionChart } from "@/components/dashboard/user-distribution-chart"
-import { CustomerGrowthChart } from "@/components/dashboard/customer-growth-chart"
 
 export const metadata: Metadata = {
   title: "Analytics",
@@ -28,7 +24,7 @@ export default function AnalyticsPage() {
               <CardDescription>Compare order, payment, and customer revenue</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
-              <RevenueChart />
+              {/* <RevenueChart /> */}
             </CardContent>
           </Card>
         </TabsContent>
@@ -39,7 +35,7 @@ export default function AnalyticsPage() {
               <CardDescription>Monthly order trends and comparison</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
-              <Overview />
+              {/* <Overview /> */}
             </CardContent>
           </Card>
         </TabsContent>
@@ -50,7 +46,7 @@ export default function AnalyticsPage() {
               <CardDescription>Monthly customer acquisition and retention</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
-              <CustomerGrowthChart />
+              {/* <CustomerGrowthChart /> */}
             </CardContent>
           </Card>
         </TabsContent>
@@ -61,7 +57,7 @@ export default function AnalyticsPage() {
               <CardDescription>Breakdown of users by role</CardDescription>
             </CardHeader>
             <CardContent className="pl-2">
-              <UserDistributionChart />
+              {/* <UserDistributionChart /> */}
             </CardContent>
           </Card>
         </TabsContent>
